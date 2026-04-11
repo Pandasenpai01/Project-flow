@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Hub - Flow</title>
+    <link rel="stylesheet" href="{% static 'css/session_hub.css' %}">
+</head>
+
+<body>
+    <header>
+        <h1>Session Hub</h1>
+        <p>Welcome, {{ user.username }}</p>
+    </header>
+
+    {% csrf_token %}
+
+    <main>
+        <!-- Active Session Section -->
+        <section id="active-session">
+            <h2>Current Session</h2>
+            
+            <div class="timer-presets" id="timer-presets" style="display: flex; gap: 8px; grid-column: 1 / -1;">
+                <button class="preset-btn" data-duration="300">5 min</button>
+                <button class="preset-btn" data-duration="1500">25 min</button>
+                <button class="preset-btn" data-duration="2700">45 min</button>
+                <button class="preset-btn" data-duration="3600">60 min</button>
+            </div>
+            <p id="selected-duration-text" style="grid-column: 1 / -1; margin: 0 0 10px; color: var(--muted); font-size: 14px;">Selected: 25 min</p>
+
+            <div id="timer-display">00:00:00</div>
+            <button id="btn-start-session">New Session</button>
+            <button id="btn-pause-session" hidden>Pause</button>
+            <button id="btn-resume-session" hidden>Resume</button>
+            <button id="btn-stop-session" hidden>Stop Session</button>
+            <p id="session-status-text">No active session</p>
+        </section>
+
+        <!-- Break Notification -->
+        <div id="break-notification" style="display:none;">
+            <h3>Time for a break!</h3>
+            <p>You've been focusing for 25 minutes.</p>
+        </div>
+
+        <!-- Rating Modal -->
+        <div id="rating-modal" style="display:none; padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-top: 16px; background-color: var(--bg-secondary);">
+            <h3 style="margin-top: 0;">How was your focus?</h3>
+            <div id="rating-stars" style="display: flex; gap: 8px; font-size: 32px; cursor: pointer;">
+                <span data-value="1" style="color: var(--muted);">&#9733;</span>
+                <span data-value="2" style="color: var(--muted);">&#9733;</span>
+                <span data-value="3" style="color: var(--muted);">&#9733;</span>
+                <span data-value="4" style="color: var(--muted);">&#9733;</span>
+                <span data-value="5" style="color: var(--muted);">&#9733;</span>
+            </div>
+            <p id="rating-status" style="margin-bottom: 0; font-size: 14px; color: var(--muted);"></p>
+        </div>
+
+        <!-- Real-Time Stats Section -->
+        <section id="stats-section">
+            <h2>Real-Time Stats</h2>
+            <div id="stats-dashboard">
+                <div class="stat-card">
+                    <p class="stat-label">Today's Focus</p>
+                    <p class="stat-value" id="stat-today-focus">0 min</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Days Focused</p>
+                    <p class="stat-value" id="stat-days-focused">0</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Weekly Total</p>
+                    <p class="stat-value" id="stat-weekly-total">0 min</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Best Day</p>
+                    <p class="stat-value" id="stat-best-day">-</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7-Day History -->
+        <section id="history-section">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                <h2 style="margin: 0;">Last 7 Days</h2>
+                <a href="{% url 'session_history' %}" style="color: var(--accent); font-size: 14px; text-decoration: none; font-weight: 600;">View Full History &rarr;</a>
+            </div>
+            <div id="history-carousel">
+                <!-- Day cards will be inserted here by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/session_hub.js' %}"></script>
+</body>
+
+</html>

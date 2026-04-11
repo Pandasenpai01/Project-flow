@@ -1,19 +1,28 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Flow · Home</title>
-    {% load tailwind_tags %}
-    {% tailwind_css %}
-  </head>
-  <body class="min-h-screen bg-black text-white">
-    <main class="mx-auto w-full max-w-4xl px-6 py-16">
-      <h1 class="text-3xl font-semibold tracking-tight">Home</h1>
-      <p class="mt-3 text-white/70">
-        Tailwind is available on this page now. Next we’ll design your real home
-        screen.
-      </p>
-    </main>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flow · Home</title>
+  {% load tailwind_tags %}
+  {% tailwind_css %}
+</head>
+
+<body class="min-h-screen bg-black text-white">
+  <main class="mx-auto w-full max-w-4xl px-6 py-16">
+    <h1 class="text-3xl font-semibold tracking-tight">Home</h1>
+    <p class="mt-3 text-white/70">
+      Tailwind is available on this page now. Next we’ll design your real home
+      screen.
+    </p>
+    <div class="mt-8">
+      <a href="{% url 'session_hub' %}"
+        class="inline-flex cursor-pointer items-center justify-center rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-900 shadow-sm hover:bg-neutral-50 transition-colors">
+        Go to Session Hub (Temporary)
+      </a>
+    </div>
+  </main>
+</body>
+
 </html>

@@ -1,0 +1,315 @@
+:root {
+  --bg: #0b1020;
+  --panel: rgba(255, 255, 255, 0.06);
+  --panel-strong: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.12);
+  --text: #e9edff;
+  --muted: rgba(233, 237, 255, 0.7);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  --accent: #6d5efc; /* purple */
+  --accent-2: #2b87ff; /* blue */
+  --danger: #ff4d6d;
+  --inactive: rgba(233, 237, 255, 0.18);
+
+  --radius: 16px;
+  --radius-sm: 12px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  background: radial-gradient(1200px 800px at 20% 0%, rgba(109, 94, 252, 0.28), transparent 55%),
+    radial-gradient(900px 700px at 90% 10%, rgba(43, 135, 255, 0.22), transparent 60%),
+    var(--bg);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+header {
+  padding: 22px 16px 10px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+header h1 {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+/* Active session */
+#active-session {
+  padding: 18px 18px 16px;
+}
+
+#active-session h2 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+#timer-display {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border);
+}
+
+#active-session button {
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  transition: transform 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+#active-session button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+#btn-start-session {
+  background: linear-gradient(135deg, rgba(109, 94, 252, 0.9), rgba(43, 135, 255, 0.85));
+  border-color: rgba(109, 94, 252, 0.55);
+}
+
+#btn-start-session:hover {
+  background: linear-gradient(135deg, rgba(109, 94, 252, 1), rgba(43, 135, 255, 0.95));
+}
+
+#btn-stop-session {
+  background: rgba(255, 77, 109, 0.12);
+  border-color: rgba(255, 77, 109, 0.35);
+}
+
+#btn-stop-session:hover {
+  background: rgba(255, 77, 109, 0.18);
+  border-color: rgba(255, 77, 109, 0.55);
+}
+
+#active-session > button,
+#active-session .btn-row button {
+  margin-top: 12px;
+}
+
+/* If buttons are direct children (current template), align them side-by-side */
+#active-session {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+#active-session h2,
+#active-session #timer-display,
+#active-session #session-status-text {
+  grid-column: 1 / -1;
+}
+
+#active-session #btn-start-session,
+#active-session #btn-stop-session {
+  width: 100%;
+}
+
+#active-session #btn-stop-session[hidden] {
+  display: none !important;
+}
+
+#session-status-text {
+  margin: 2px 0 0;
+  color: var(--muted);
+}
+
+/* Break notification */
+#break-notification {
+  padding: 14px 18px;
+  border-left: 4px solid var(--accent-2);
+  background: linear-gradient(180deg, rgba(43, 135, 255, 0.1), rgba(255, 255, 255, 0.04));
+}
+
+/* History */
+#history-section {
+  padding: 18px;
+}
+
+#history-section h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+#history-carousel {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 6px 2px 10px;
+  scroll-snap-type: x mandatory;
+}
+
+#history-carousel::-webkit-scrollbar {
+  height: 10px;
+}
+
+#history-carousel::-webkit-scrollbar-thumb {
+  background: rgba(233, 237, 255, 0.22);
+  border-radius: 999px;
+}
+
+.day-card {
+  flex: 0 0 220px;
+  scroll-snap-align: start;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  padding: 14px;
+}
+
+.day-card .day-card-date,
+.day-card h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.day-card .day-card-focus,
+.day-card p {
+  margin: 10px 0 0;
+  color: var(--muted);
+}
+
+.day-card .progress-ring,
+.progress-ring {
+  margin-top: 12px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+}
+
+/* Stats Dashboard */
+#stats-section {
+  padding: 18px;
+}
+
+#stats-section h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+#stats-dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.stat-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.stat-value {
+  margin: 8px 0 0;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+/* Progress Ring Animation */
+.circular-chart {
+  display: block;
+  margin: 0 auto;
+  max-width: 80%;
+  max-height: 50px;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: rgba(233, 237, 255, 0.15);
+  stroke-width: 3.8;
+}
+
+.circle {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s ease-out;
+}
+
+.circle.accent-ring {
+  stroke: var(--accent);
+}
+
+/* Small usability improvements */
+button:focus-visible {
+  outline: 3px solid rgba(109, 94, 252, 0.55);
+  outline-offset: 2px;
+}
+
