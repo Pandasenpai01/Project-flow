@@ -10,86 +10,113 @@
 </head>
 
 <body>
-    <header>
-        <h1>Session Hub</h1>
-        <p>Welcome, {{ user.username }}</p>
+    <!-- Page Header (hidden in Zen Mode) -->
+    <header id="page-header">
+        <div class="header-inner">
+            <div>
+                <h1>Session Hub</h1>
+                <p>Welcome back, {{ user.username }}</p>
+            </div>
+            <a href="{% url 'home' %}" class="nav-link">← Home</a>
+        </div>
     </header>
 
     {% csrf_token %}
 
-    <main>
-        <!-- Active Session Section -->
-        <section id="active-session">
-            <h2>Current Session</h2>
-            
-            <div class="timer-presets" id="timer-presets" style="display: flex; gap: 8px; grid-column: 1 / -1;">
-                <button class="preset-btn" data-duration="300">5 min</button>
+    <main id="page-main">
+
+        <!-- ═══════════════════════════════════════════════════
+             SECTION 1 · TIMER BUBBLE
+        ════════════════════════════════════════════════════ -->
+        <section class="bubble" id="timer-bubble">
+
+            <p class="bubble-label">CURRENT SESSION</p>
+
+            <!-- Duration presets + custom -->
+            <div id="timer-presets">
+                <button class="preset-btn active" data-duration="300">5 min</button>
                 <button class="preset-btn" data-duration="1500">25 min</button>
                 <button class="preset-btn" data-duration="2700">45 min</button>
                 <button class="preset-btn" data-duration="3600">60 min</button>
+                <div class="custom-wrap">
+                    <input
+                        type="number"
+                        id="custom-duration-input"
+                        placeholder="Custom"
+                        min="1"
+                        max="480"
+                        aria-label="Custom duration in minutes"
+                    />
+                    <span class="custom-unit">min</span>
+                </div>
             </div>
-            <p id="selected-duration-text" style="grid-column: 1 / -1; margin: 0 0 10px; color: var(--muted); font-size: 14px;">Selected: 25 min</p>
 
-            <div id="timer-display">00:00:00</div>
-            <button id="btn-start-session">New Session</button>
-            <button id="btn-pause-session" hidden>Pause</button>
-            <button id="btn-resume-session" hidden>Resume</button>
-            <button id="btn-stop-session" hidden>Stop Session</button>
-            <p id="session-status-text">No active session</p>
+            <p id="selected-duration-text">Selected: 5 min</p>
+
+            <!-- Digital clock -->
+            <div id="timer-display" aria-live="polite" aria-atomic="true">00:00:00</div>
+
+            <!-- Controls -->
+            <div id="session-controls">
+                <button id="btn-start-session" class="btn btn-primary">▶ Start Session</button>
+                <button id="btn-pause-session" class="btn btn-ghost" hidden>⏸ Pause</button>
+                <button id="btn-resume-session" class="btn btn-ghost" hidden>▶ Resume</button>
+                <button id="btn-stop-session" class="btn btn-danger" hidden>■ End Session</button>
+            </div>
+
+            <p id="session-status-text">No active session · Press Space to start</p>
+
+            <!-- Simple Text Goal Display -->
+            <div id="goal-edit-trigger" role="button" tabindex="0" title="Click to set your daily goal">
+                <span id="goal-text-display">Focus Goal: 0 / 120m</span>
+                <span class="goal-hint">(Click to set goal)</span>
+            </div>
+
+            <!-- Break notification (inside timer bubble) -->
+            <div id="break-notification" hidden>
+                🔔 Time for a break! You've completed your session goal.
+            </div>
+
+            <!-- Rating modal (inside timer bubble, only shown after session ends) -->
+            <div id="rating-modal" hidden>
+                <p class="rating-title">How was your focus?</p>
+                <div id="rating-stars" role="group" aria-label="Rate your session">
+                    <span data-value="1" role="button" tabindex="0" aria-label="1 star">★</span>
+                    <span data-value="2" role="button" tabindex="0" aria-label="2 stars">★</span>
+                    <span data-value="3" role="button" tabindex="0" aria-label="3 stars">★</span>
+                    <span data-value="4" role="button" tabindex="0" aria-label="4 stars">★</span>
+                    <span data-value="5" role="button" tabindex="0" aria-label="5 stars">★</span>
+                </div>
+                <p id="rating-status"></p>
+            </div>
+
         </section>
 
-        <!-- Break Notification -->
-        <div id="break-notification" style="display:none;">
-            <h3>Time for a break!</h3>
-            <p>You've been focusing for 25 minutes.</p>
-        </div>
+        <!-- ═══════════════════════════════════════════════════
+             SECTION 2 · HISTORY BUBBLE  (hidden in Zen Mode)
+        ════════════════════════════════════════════════════ -->
+        <section class="bubble" id="history-bubble">
 
-        <!-- Rating Modal -->
-        <div id="rating-modal" style="display:none; padding: 20px; border: 1px solid var(--border); border-radius: 8px; margin-top: 16px; background-color: var(--bg-secondary);">
-            <h3 style="margin-top: 0;">How was your focus?</h3>
-            <div id="rating-stars" style="display: flex; gap: 8px; font-size: 32px; cursor: pointer;">
-                <span data-value="1" style="color: var(--muted);">&#9733;</span>
-                <span data-value="2" style="color: var(--muted);">&#9733;</span>
-                <span data-value="3" style="color: var(--muted);">&#9733;</span>
-                <span data-value="4" style="color: var(--muted);">&#9733;</span>
-                <span data-value="5" style="color: var(--muted);">&#9733;</span>
+            <div class="history-header">
+                <p class="bubble-label" style="margin:0;">LAST 7 DAYS</p>
+                <a href="{% url 'session_history' %}" class="view-all-link">View Full History →</a>
             </div>
-            <p id="rating-status" style="margin-bottom: 0; font-size: 14px; color: var(--muted);"></p>
-        </div>
 
-        <!-- Real-Time Stats Section -->
-        <section id="stats-section">
-            <h2>Real-Time Stats</h2>
-            <div id="stats-dashboard">
-                <div class="stat-card">
-                    <p class="stat-label">Today's Focus</p>
-                    <p class="stat-value" id="stat-today-focus">0 min</p>
+            <!-- Carousel wrapper -->
+            <div class="carousel-wrapper">
+                <button class="carousel-arrow" id="carousel-prev" aria-label="Previous day">‹</button>
+
+                <div id="history-carousel" aria-live="polite">
+                    <!-- Single big card rendered by JS -->
                 </div>
-                <div class="stat-card">
-                    <p class="stat-label">Days Focused</p>
-                    <p class="stat-value" id="stat-days-focused">0</p>
-                </div>
-                <div class="stat-card">
-                    <p class="stat-label">Weekly Total</p>
-                    <p class="stat-value" id="stat-weekly-total">0 min</p>
-                </div>
-                <div class="stat-card">
-                    <p class="stat-label">Best Day</p>
-                    <p class="stat-value" id="stat-best-day">-</p>
-                </div>
+
+                <button class="carousel-arrow" id="carousel-next" aria-label="Next day">›</button>
             </div>
+
+            <p class="carousel-counter" id="carousel-counter">1 / 7</p>
+
         </section>
 
-        <!-- 7-Day History -->
-        <section id="history-section">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
-                <h2 style="margin: 0;">Last 7 Days</h2>
-                <a href="{% url 'session_history' %}" style="color: var(--accent); font-size: 14px; text-decoration: none; font-weight: 600;">View Full History &rarr;</a>
-            </div>
-            <div id="history-carousel">
-                <!-- Day cards will be inserted here by JavaScript -->
-            </div>
-        </section>
     </main>
 
     <script src="{% static 'js/session_hub.js' %}"></script>

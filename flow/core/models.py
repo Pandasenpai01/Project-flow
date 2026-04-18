@@ -101,6 +101,19 @@ class DailyStatistic(models.Model):
         verbose_name="circular progress",
         help_text="Percentage of daily goal achieved (0–100); updated by views later.",
     )
+    daily_goal = models.PositiveIntegerField(
+        default=120,
+        verbose_name="daily goal (minutes)",
+        help_text="The user's focus-time goal for this day, in minutes.",
+    )
+
+    @property
+    def progress_percentage(self):
+        """Return focus completion as 0–100, based on total_focus_time (seconds) vs daily_goal (minutes)."""
+        if not self.daily_goal:
+            return 0.0
+        focus_minutes = (self.total_focus_time or 0) / 60.0
+        return min(round(focus_minutes / self.daily_goal * 100, 1), 100.0)
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="created at",

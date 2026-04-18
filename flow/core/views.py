@@ -9,6 +9,7 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Sum, Avg, Max
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 from .models import DailyStatistic, Session
 
@@ -153,6 +154,33 @@ def stop_session(request, session_id=None):
         session.save(update_fields=["end_time", "duration", "status", "updated_at"])
     except Exception:
         return JsonResponse({"error": "could_not_stop_session"}, status=500)
+
+    # ── Aggregate into DailyStatistic ──────────────────
+    try:
+        today = timezone.now().date()
+        daily_stat, _ = DailyStatistic.objects.get_or_create(
+            user=request.user,
+            date=today,
+            defaults={"total_focus_time": 0, "circular_progress": 0.0},
+        )
+        daily_stat.total_focus_time = (daily_stat.total_focus_time or 0) + duration_seconds
+        daily_stat.circular_progress = daily_stat.progress_percentage
+        
+        # Add session to many-to-many relationship
+        daily_stat.sessions.add(session)
+        
+        # Explicitly recalculate session_count by counting all completed sessions for this user/date
+        session_count = Session.objects.filter(
+            user=request.user,
+            start_time__date=today,
+            status=Session.Status.COMPLETED
+        ).count()
+        
+        daily_stat.save(update_fields=["total_focus_time", "circular_progress", "updated_at"])
+    except Exception as e:
+        # Non-fatal: the session itself is already saved
+        import logging
+        logging.getLogger(__name__).warning("DailyStatistic update failed: %s", e)
 
     return JsonResponse(
         {
@@ -309,23 +337,84 @@ def get_7day_history(request):
 
         if stat is None:
             try:
+                # Get the most recent daily_goal from previous days
+                latest_goal = DailyStatistic.objects.filter(
+                    user=request.user,
+                    date__lt=day
+                ).order_by('-date').values_list('daily_goal', flat=True).first()
+                
+                default_goal = latest_goal if latest_goal is not None else 120
+                
                 stat, _created = DailyStatistic.objects.get_or_create(
                     user=request.user,
                     date=day,
-                    defaults={"total_focus_time": 0, "circular_progress": 0.0},
+                    defaults={"total_focus_time": 0, "circular_progress": 0.0, "daily_goal": default_goal},
                 )
             except Exception:
                 return JsonResponse({"error": "could_not_create_missing_day"}, status=500)
+
+        session_count = Session.objects.filter(
+            user=request.user,
+            start_time__date=day,
+            status=Session.Status.COMPLETED
+        ).count()
 
         data.append(
             {
                 "date": stat.date.isoformat(),
                 "total_focus_time": stat.total_focus_time,
-                "circular_progress": float(stat.circular_progress),
+                "circular_progress": float(stat.progress_percentage),
+                "daily_goal": stat.daily_goal,
+                "progress_percentage": float(stat.progress_percentage),
+                "session_count": session_count,
             }
         )
 
     return JsonResponse({"data": data})
+
+
+@require_http_methods(["POST"])
+def update_daily_goal(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+
+    body = _get_json_body(request)
+    if body is None or not isinstance(body, dict):
+        return JsonResponse({"error": "invalid_json"}, status=400)
+
+    raw_goal = body.get("goal_minutes")
+    try:
+        goal_minutes = int(raw_goal)
+        if goal_minutes <= 0:
+            raise ValueError
+    except (TypeError, ValueError):
+        return JsonResponse(
+            {"error": "invalid_goal", "message": "goal_minutes must be a positive integer."},
+            status=400,
+        )
+
+    today = timezone.now().date()
+    daily_stat, _ = DailyStatistic.objects.get_or_create(
+        user=request.user,
+        date=today,
+        defaults={"total_focus_time": 0, "circular_progress": 0.0},
+    )
+    daily_stat.daily_goal = goal_minutes
+    daily_stat.circular_progress = daily_stat.progress_percentage
+    daily_stat.save(update_fields=["daily_goal", "circular_progress", "updated_at"])
+
+    return JsonResponse({
+        "daily_goal": daily_stat.daily_goal,
+        "progress_percentage": daily_stat.progress_percentage,
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def clear_all_history(request):
+    Session.objects.filter(user=request.user).delete()
+    DailyStatistic.objects.filter(user=request.user).delete()
+    return JsonResponse({"status": "success"})
 
 
 class SessionHistoryListView(LoginRequiredMixin, ListView):

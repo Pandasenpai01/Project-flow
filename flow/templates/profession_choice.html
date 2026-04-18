@@ -1,249 +1,248 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Choose your profession</title>
-    <style>
-      :root {
-        color-scheme: dark;
-        --bg: #050505;
-        --border: rgba(255, 255, 255, 0.14);
-        --border-strong: rgba(255, 255, 255, 0.28);
-      }
 
-      * {
-        box-sizing: border-box;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Choose your profession</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #050505;
+      --border: rgba(255, 255, 255, 0.14);
+      --border-strong: rgba(255, 255, 255, 0.28);
+    }
 
-      body {
-        margin: 0;
-        min-height: 100vh;
-        background: var(--bg);
-        color: #fff;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
-          Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-        overflow-x: hidden;
-      }
+    * {
+      box-sizing: border-box;
+    }
 
-      /* Soft light bubble following cursor */
-      .spotlight {
-        position: fixed;
-        inset: 0;
-        pointer-events: none;
-        z-index: 0;
-        opacity: 0.95;
-        background: radial-gradient(
-          420px circle at var(--mx, 50%) var(--my, 40%),
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: #fff;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+        Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      overflow-x: hidden;
+    }
+
+    /* Soft light bubble following cursor */
+    .spotlight {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.95;
+      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 40%),
           rgba(255, 255, 255, 0.12),
           rgba(255, 255, 255, 0.06) 26%,
-          rgba(0, 0, 0, 0) 60%
-        );
-        mix-blend-mode: screen;
-      }
+          rgba(0, 0, 0, 0) 60%);
+      mix-blend-mode: screen;
+    }
 
-      .wrap {
-        position: relative;
-        z-index: 1;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
+    .wrap {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-      header {
-        padding: 28px 22px 0;
-      }
-      .brand {
-        width: min(980px, 92vw);
-        margin: 0 auto;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-      }
-      .logo {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 600;
-        letter-spacing: 0.2px;
-      }
-      .dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.9);
-        box-shadow: 0 0 18px rgba(255, 255, 255, 0.55);
-      }
+    header {
+      padding: 28px 22px 0;
+    }
 
-      main {
-        flex: 1;
-        display: flex;
-        justify-content: flex-start;
-        padding: 72px 22px 56px;
-      }
-      .content {
-        width: min(980px, 92vw);
-        margin: 0 auto;
-      }
+    .brand {
+      width: min(980px, 92vw);
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
 
-      h1 {
-        margin: 0;
-        font-size: clamp(26px, 2.8vw, 40px);
-        font-weight: 600;
-        letter-spacing: 0.2px;
-        text-transform: lowercase;
-        text-align: center;
-      }
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
 
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.55);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: flex-start;
+      padding: 72px 22px 56px;
+    }
+
+    .content {
+      width: min(980px, 92vw);
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 2.8vw, 40px);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      text-transform: lowercase;
+      text-align: center;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 56px;
+      max-width: 660px;
+      margin-left: auto;
+      margin-right: auto;
+      justify-items: center;
+    }
+
+    .option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      width: clamp(210px, 24vw, 260px);
+      aspect-ratio: 1 / 1;
+      padding: 22px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.18);
+      color: #fff;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease,
+        border-color 120ms ease;
+      text-align: center;
+    }
+
+    .option:hover,
+    .option:focus-visible {
+      transform: translateY(-1px);
+      border-color: var(--border-strong);
+      background: rgba(255, 255, 255, 0.05);
+      outline: none;
+    }
+
+    .label {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .arrow {
+      opacity: 0.7;
+      font-size: 18px;
+    }
+
+    .icon {
+      width: 52px;
+      height: 52px;
+      opacity: 0.9;
+    }
+
+    .icon path,
+    .icon line,
+    .icon rect,
+    .icon polyline {
+      stroke: rgba(255, 255, 255, 0.9);
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    @media (max-width: 680px) {
       .options {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-        margin-top: 56px;
-        max-width: 660px;
-        margin-left: auto;
-        margin-right: auto;
-        justify-items: center;
+        grid-template-columns: 1fr;
       }
+    }
+  </style>
+</head>
 
-      .option {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 14px;
-        width: clamp(210px, 24vw, 260px);
-        aspect-ratio: 1 / 1;
-        padding: 22px;
-        border-radius: 20px;
-        border: 1px solid var(--border);
-        background: rgba(0, 0, 0, 0.18);
-        color: #fff;
-        text-decoration: none;
-        cursor: pointer;
-        transition: transform 120ms ease, background 120ms ease,
-          border-color 120ms ease;
-        text-align: center;
-      }
-      .option:hover,
-      .option:focus-visible {
-        transform: translateY(-1px);
-        border-color: var(--border-strong);
-        background: rgba(255, 255, 255, 0.05);
-        outline: none;
-      }
+<body>
+  <div class="spotlight" aria-hidden="true"></div>
 
-      .label {
-        font-size: 16px;
-        font-weight: 600;
-      }
-      .arrow {
-        opacity: 0.7;
-        font-size: 18px;
-      }
-      .icon {
-        width: 52px;
-        height: 52px;
-        opacity: 0.9;
-      }
-      .icon path,
-      .icon line,
-      .icon rect,
-      .icon polyline {
-        stroke: rgba(255, 255, 255, 0.9);
-        stroke-width: 1.8;
-        fill: none;
-        stroke-linecap: round;
-        stroke-linejoin: round;
-      }
-
-      @media (max-width: 680px) {
-        .options {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="spotlight" aria-hidden="true"></div>
-
-    <div class="wrap">
-      <header>
-        <div class="brand">
-          <div class="logo" aria-label="Flow">
-            <span class="dot" aria-hidden="true"></span>
-            <span>Flow</span>
-          </div>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-label="Flow">
+          <span class="dot" aria-hidden="true"></span>
+          <span>FLOW</span>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <main role="main" aria-label="Choose your profession">
-        <section class="content">
-          <h1>choose your profession</h1>
+    <main role="main" aria-label="Choose your profession">
+      <section class="content">
+        <h1>choose your profession</h1>
 
-          <div class="options" role="list">
-            <a class="option" href="/home/" role="listitem" aria-label="Student">
-              <svg
-                class="icon"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <!-- Books icon (simple line art) -->
-                <rect x="4" y="5" width="7" height="14" rx="1.5"></rect>
-                <rect x="13" y="5" width="7" height="14" rx="1.5"></rect>
-                <line x1="7" y1="9" x2="8.5" y2="9"></line>
-                <line x1="16" y1="9" x2="17.5" y2="9"></line>
-              </svg>
-              <span>
-                <span class="label">Student</span>
-              </span>
-              <span class="arrow" aria-hidden="true">→</span>
-            </a>
+        <div class="options" role="list">
+          <a class="option" href="/home/" role="listitem" aria-label="Student">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <!-- Books icon (simple line art) -->
+              <rect x="4" y="5" width="7" height="14" rx="1.5"></rect>
+              <rect x="13" y="5" width="7" height="14" rx="1.5"></rect>
+              <line x1="7" y1="9" x2="8.5" y2="9"></line>
+              <line x1="16" y1="9" x2="17.5" y2="9"></line>
+            </svg>
+            <span>
+              <span class="label">Student</span>
+            </span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
 
-            <button class="option" type="button" role="listitem">
-              <svg
-                class="icon"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                focusable="false"
-              >
-                <!-- Laptop icon (simple line art) -->
-                <rect x="6" y="6.5" width="12" height="9" rx="1.5"></rect>
-                <path d="M4.5 17.5h15"></path>
-                <path d="M7 17.5l-1 2h12l-1-2"></path>
-              </svg>
-              <span>
-                <span class="label">Working Professional</span>
-              </span>
-              <span class="arrow" aria-hidden="true">→</span>
-            </button>
-          </div>
-        </section>
-      </main>
-    </div>
+          <button class="option" type="button" role="listitem">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <!-- Laptop icon (simple line art) -->
+              <rect x="6" y="6.5" width="12" height="9" rx="1.5"></rect>
+              <path d="M4.5 17.5h15"></path>
+              <path d="M7 17.5l-1 2h12l-1-2"></path>
+            </svg>
+            <span>
+              <span class="label">Working Professional</span>
+            </span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
 
-    <script>
-      (() => {
-        const root = document.documentElement;
+  <script>
+    (() => {
+      const root = document.documentElement;
 
-        function setSpotlight(x, y) {
-          root.style.setProperty("--mx", `${x}px`);
-          root.style.setProperty("--my", `${y}px`);
-        }
+      function setSpotlight(x, y) {
+        root.style.setProperty("--mx", `${x}px`);
+        root.style.setProperty("--my", `${y}px`);
+      }
 
-        window.addEventListener(
-          "pointermove",
-          (e) => setSpotlight(e.clientX, e.clientY),
-          { passive: true },
-        );
+      window.addEventListener(
+        "pointermove",
+        (e) => setSpotlight(e.clientX, e.clientY),
+        { passive: true },
+      );
 
-        setSpotlight(
-          Math.round(window.innerWidth * 0.5),
-          Math.round(window.innerHeight * 0.42),
-        );
-      })();
-    </script>
-  </body>
+      setSpotlight(
+        Math.round(window.innerWidth * 0.5),
+        Math.round(window.innerHeight * 0.42),
+      );
+    })();
+  </script>
+</body>
+
 </html>

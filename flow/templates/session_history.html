@@ -54,6 +54,8 @@
                     <div style="display: flex; gap: 8px;">
                         <a href="{% url 'export_csv' %}" class="btn-reset" style="border: 1px solid var(--border); padding: 4px 12px;">&darr; CSV</a>
                         <a href="{% url 'export_pdf' %}" class="btn-reset" style="border: 1px solid var(--border); padding: 4px 12px;">&darr; PDF</a>
+                        <button id="btn-clear-history" class="btn-reset" style="border: 1px solid rgba(255, 77, 109, 0.35); background: rgba(255, 77, 109, 0.12); color: #ff4d6d; padding: 4px 12px; cursor: pointer;">Clear All History</button>
+                        {% csrf_token %}
                     </div>
                 </div>
                 <form method="GET" class="filter-form">
@@ -146,5 +148,37 @@
             {% endif %}
         </section>
     </main>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const clearBtn = document.getElementById("btn-clear-history");
+            const csrfTokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+            
+            if (clearBtn && csrfTokenElement) {
+                clearBtn.addEventListener("click", function() {
+                    const confirmed = confirm("Are you sure? This will permanently delete all your sessions and focus stats.");
+                    if (!confirmed) return;
+
+                    fetch("{% url 'clear_all_history' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": csrfTokenElement.value
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            alert("Failed to clear history.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error clearing history:", err);
+                        alert("Network error. Could not clear history.");
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>
