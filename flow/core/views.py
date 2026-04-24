@@ -1,7 +1,9 @@
 import json
 import csv
+import requests
 from datetime import timedelta
 
+from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -11,14 +13,154 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
-from .models import DailyStatistic, Session
+from .models import DailyStatistic, Session, UserProfile
 
 
+import random
+
+# ---------------------------------------------------------------------------
+# Motivational quotes shown randomly on the home screen
+# ---------------------------------------------------------------------------
+_MOTIVATIONAL_QUOTES = [
+    "The secret of getting ahead is getting started. – Mark Twain",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts. – Winston Churchill",
+    "Hard work beats talent when talent doesn't work hard. – Tim Notke",
+    "Believe you can and you're halfway there. – Theodore Roosevelt",
+    "It does not matter how slowly you go as long as you do not stop. – Confucius",
+    "Discipline is the bridge between goals and accomplishment. – Jim Rohn",
+    "The future belongs to those who believe in the beauty of their dreams. – Eleanor Roosevelt",
+    "Don't watch the clock; do what it does — keep going. – Sam Levenson",
+    "You don't have to be great to start, but you have to start to be great. – Zig Ziglar",
+    "Excellence is not a destination but a continuous journey that never ends. – Brian Tracy",
+    "The only way to do great work is to love what you do. – Steve Jobs",
+    "Push yourself, because no one else is going to do it for you.",
+    "Great things never come from comfort zones.",
+    "Dream it. Wish it. Do it.",
+    "Success doesn't just find you. You have to go out and get it.",
+]
+
+# ---------------------------------------------------------------------------
+# Goal → News-API query mapping
+# ---------------------------------------------------------------------------
+_GOAL_QUERY_MAP = {
+    "ias": "IAS officer success stories",
+    "upsc": "UPSC topper interview tips",
+    "doctor": "medical school success inspiration",
+    "engineer": "engineering career breakthroughs",
+    "software engineer": "software engineering career growth",
+    "developer": "software developer career tips",
+    "data scientist": "data science career success",
+    "entrepreneur": "startup founder success stories",
+    "ca": "chartered accountant career success",
+    "lawyer": "law career success stories",
+    "neet": "NEET topper success tips",
+    "jee": "JEE topper strategies",
+    "gmat": "GMAT MBA success stories",
+    "pilot": "airline pilot career journey",
+    "teacher": "inspiring teacher career stories",
+}
+
+
+def _fetch_news_for_goal(query):
+    """Fetch real-time news headlines based on the query."""
+    api_key = getattr(settings, 'NEWSAPI_KEY', None)
+    if not api_key or api_key.startswith('YOUR_'):
+        return []
+
+    url = f"https://newsapi.org/v2/everything?q={query}&sortBy=relevancy&pageSize=3&language=en&apiKey={api_key}"
+    try:
+        response = requests.get(url, timeout=4)
+        if response.status_code == 200:
+            data = response.json()
+            articles = data.get('articles', [])
+            news_items = []
+            for item in articles:
+                news_items.append({
+                    'title': item.get('title'),
+                    'url': item.get('url'),
+                    'source': item.get('source', {}).get('name', 'News Site')
+                })
+            return news_items
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("News API fetch failed: %s", e)
+    return []
+
+@login_required
 def home(request):
-    return render(request, "home.html")
+    """Home screen — requires authentication; shows dream goal & a motivational quote."""
+    profile, _created = UserProfile.objects.get_or_create(user=request.user)
+
+    # Pick a random quote for the session
+    random_quote = random.choice(_MOTIVATIONAL_QUOTES)
+
+    # Build a news query tailored to the dream goal
+    goal_lower = (profile.dream_goal or "").strip().lower()
+    news_query = _GOAL_QUERY_MAP.get(
+        goal_lower,
+        f"{profile.dream_goal} career success stories" if profile.dream_goal else "productivity and success",
+    )
+    
+    news_items = _fetch_news_for_goal(news_query)
+
+    context = {
+        "dream_goal": profile.dream_goal,
+        "random_quote": random_quote,
+        "news_query": news_query,
+        "news_items": news_items,
+    }
+    return render(request, "home.html", context)
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_dream_goal(request):
+    """API endpoint: save or update the authenticated user's dream goal.
+
+    Expects a JSON body: {"dream_goal": "<string>"}
+    Returns:            {"status": "ok", "dream_goal": "<string>"}   (200)
+                     or {"error": "<reason>"}                        (400/500)
+    """
+    body = _get_json_body(request)
+    if body is None or not isinstance(body, dict):
+        return JsonResponse(
+            {"error": "invalid_json", "message": "Request body must be valid JSON."},
+            status=400,
+        )
+
+    raw_goal = body.get("dream_goal", "")
+    if not isinstance(raw_goal, str):
+        return JsonResponse(
+            {"error": "invalid_field", "message": "dream_goal must be a string."},
+            status=400,
+        )
+
+    # Sanitise: strip whitespace, cap at model's max_length
+    dream_goal = raw_goal.strip()[:255]
+
+    try:
+        profile, _created = UserProfile.objects.get_or_create(user=request.user)
+        profile.dream_goal = dream_goal
+        profile.save(update_fields=["dream_goal"])
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).exception("update_dream_goal failed: %s", exc)
+        return JsonResponse(
+            {"error": "server_error", "message": "Could not save your goal. Please try again."},
+            status=500,
+        )
+
+    return JsonResponse({"status": "ok", "dream_goal": profile.dream_goal})
 
 
 def profession_choice(request):
+    from django.contrib.auth.models import User
+    from django.contrib.auth import login
+    if not request.user.is_authenticated:
+        user = User.objects.first()
+        if not user:
+            user = User.objects.create_user(username='flow_user', password='password')
+        login(request, user)
     return render(request, "profession_choice.html")
 
 

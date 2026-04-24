@@ -2,10 +2,10 @@ from django.urls import path
 
 from . import views
 from .views import (
-    get_7day_history, start_session, stop_session, session_hub, 
+    get_7day_history, start_session, stop_session, session_hub,
     SessionHistoryListView, export_sessions_csv, export_sessions_pdf,
     get_current_session, pause_session, resume_session, rate_session,
-    update_daily_goal, clear_all_history
+    update_daily_goal, clear_all_history, update_dream_goal,
 )
 
 urlpatterns = [
@@ -24,4 +24,5 @@ urlpatterns = [
     path("api/history/7days/", get_7day_history, name="get_7day_history"),
     path("api/history/clear/", clear_all_history, name="clear_all_history"),
     path("api/goal/update/", update_daily_goal, name="update_daily_goal"),
+    path("api/dream/update/", update_dream_goal, name="update_dream_goal"),
 ]

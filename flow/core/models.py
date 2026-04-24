@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.db import models
 
 
@@ -131,3 +132,34 @@ class DailyStatistic(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user_id} @ {self.date}"
+
+
+class UserProfile(models.Model):
+    """Extended profile data for a registered user."""
+
+    user = models.OneToOneField(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name="profile",
+        verbose_name="user",
+        help_text="The user this profile belongs to.",
+    )
+    dream_goal = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        verbose_name="dream goal",
+        help_text="The user's long-term dream or career aspiration (e.g. 'IAS', 'Software Engineer').",
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="created at",
+        help_text="When this profile record was first created.",
+    )
+
+    class Meta:
+        verbose_name = "user profile"
+        verbose_name_plural = "user profiles"
+
+    def __str__(self) -> str:
+        return f"Profile({self.user_id})"

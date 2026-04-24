@@ -191,7 +191,7 @@
         <h1>choose your profession</h1>
 
         <div class="options" role="list">
-          <a class="option" href="/home/" role="listitem" aria-label="Student">
+          <a class="option" href="{% url 'home' %}" role="listitem" aria-label="Student">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <!-- Books icon (simple line art) -->
               <rect x="4" y="5" width="7" height="14" rx="1.5"></rect>
@@ -205,7 +205,7 @@
             <span class="arrow" aria-hidden="true">→</span>
           </a>
 
-          <button class="option" type="button" role="listitem">
+          <a class="option" href="#" role="listitem" aria-label="Working Professional">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <!-- Laptop icon (simple line art) -->
               <rect x="6" y="6.5" width="12" height="9" rx="1.5"></rect>
@@ -216,7 +216,7 @@
               <span class="label">Working Professional</span>
             </span>
             <span class="arrow" aria-hidden="true">→</span>
-          </button>
+          </a>
         </div>
       </section>
     </main>

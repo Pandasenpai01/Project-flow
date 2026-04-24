@@ -1,28 +1,1118 @@
+{% load tailwind_tags %}
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-full">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Flow · Home</title>
-  {% load tailwind_tags %}
+  <meta name="description"
+    content="Flow — your personal focus dashboard. Track sessions, set your dream goal, and get daily motivation." />
+  <title>Flow · Dashboard</title>
   {% tailwind_css %}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #09090b;          /* zinc-950 */
+      color: #e4e4e7;               /* zinc-200 */
+      overflow-x: hidden;
+    }
+
+    /* ── Noise / grain texture overlay ────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Radial ambient glow ───────────────────────── */
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-1 {
+      width: 600px; height: 600px;
+      top: -200px; left: -200px;
+      background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
+    }
+    .glow-2 {
+      width: 500px; height: 500px;
+      bottom: -150px; right: -150px;
+      background: radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%);
+    }
+
+    /* ── Layout shell ──────────────────────────────── */
+    .shell {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ──────────────────────────────────────────────── */
+    /*  SIDEBAR                                         */
+    /* ──────────────────────────────────────────────── */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 300px;
+      background: rgba(24, 24, 27, 0.72);   /* zinc-900 + alpha */
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-right: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      gap: 2rem;
+      transform: translateX(-100%);
+      transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
+    }
+    #sidebar.open { transform: translateX(0); }
+
+    /* Sidebar logo / brand */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+    .sidebar-brand .logo-mark {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; color: #fff;
+      box-shadow: 0 0 16px rgba(99,102,241,0.5);
+    }
+    .sidebar-brand span {
+      font-size: 1.1rem; font-weight: 600;
+      letter-spacing: 0.06em;
+      background: linear-gradient(90deg, #a5b4fc, #c4b5fd);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* Divider */
+    .sidebar-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    }
+
+    /* ── Section label ─────────────────────────────── */
+    .sidebar-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(161,161,170,0.7);   /* zinc-400 */
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Motivation card ───────────────────────────── */
+    .quote-card {
+      background: rgba(39,39,42,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .quote-card::before {
+      content: '\201C';
+      position: absolute; top: -8px; left: 12px;
+      font-size: 4rem; line-height: 1;
+      color: rgba(99,102,241,0.25);
+      font-family: Georgia, serif;
+    }
+    .quote-text {
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: #d4d4d8;  /* zinc-300 */
+      font-style: italic;
+      padding-top: 1rem;
+    }
+    .quote-accent {
+      display: block;
+      width: 28px; height: 2px;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      border-radius: 2px;
+      margin-top: 0.9rem;
+    }
+
+    /* ── Intel card ────────────────────────────────── */
+    .intel-card {
+      background: rgba(39,39,42,0.6);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 1.25rem;
+      flex: 1;
+    }
+    .intel-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .intel-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #10b981;  /* emerald-500 */
+      box-shadow: 0 0 6px #10b981;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.6; transform: scale(0.85); }
+    }
+    .intel-title {
+      font-size: 0.78rem; font-weight: 600;
+      color: #a1a1aa;
+      letter-spacing: 0.04em;
+    }
+    .intel-query {
+      font-size: 0.88rem; font-weight: 500;
+      color: #e4e4e7;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+    }
+    .intel-badge {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.3);
+      font-size: 0.7rem; font-weight: 500;
+      color: #a5b4fc;
+      letter-spacing: 0.04em;
+    }
+
+    /* Sidebar nav links */
+    .sidebar-nav { display: flex; flex-direction: column; gap: 0.4rem; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.875rem; font-weight: 500;
+      color: #a1a1aa;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .sidebar-nav a:hover, .sidebar-nav a.active {
+      background: rgba(99,102,241,0.12);
+      color: #a5b4fc;
+    }
+    .sidebar-nav a .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    /* ──────────────────────────────────────────────── */
+    /*  SIDEBAR TOGGLE BUTTON                           */
+    /* ──────────────────────────────────────────────── */
+    #sidebar-toggle {
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      z-index: 100;
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      background: rgba(24,24,27,0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    #sidebar-toggle:hover {
+      background: rgba(99,102,241,0.2);
+      border-color: rgba(99,102,241,0.4);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.15), 0 4px 24px rgba(0,0,0,0.4);
+    }
+    #sidebar-toggle svg {
+      width: 18px; height: 18px;
+      stroke: #a5b4fc;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    #sidebar-toggle.active svg { transform: rotate(180deg); }
+
+    /* Sidebar overlay (mobile) */
+    #sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(2px);
+      z-index: 40;
+    }
+    #sidebar-overlay.visible { display: block; }
+
+    /* ──────────────────────────────────────────────── */
+    /*  MAIN CONTENT                                    */
+    /* ──────────────────────────────────────────────── */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 2.5rem 3rem;
+      transition: margin-left 0.38s cubic-bezier(0.4,0,0.2,1);
+    }
+    .main-content.shifted { margin-left: 300px; }
+
+    /* ── Top bar ───────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 3rem;
+      padding-left: 3.5rem; /* clear the toggle button */
+    }
+    .topbar-greeting {
+      display: flex; flex-direction: column; gap: 0.2rem;
+    }
+    .topbar-greeting .eyebrow {
+      font-size: 0.7rem; font-weight: 600;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(161,161,170,0.6);
+    }
+    .topbar-greeting h1 {
+      font-size: 1.65rem; font-weight: 700;
+      background: linear-gradient(90deg, #f4f4f5 30%, #a1a1aa 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin: 0;
+    }
+    
+    .goal-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #e4e4e7;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      box-shadow: 0 0 16px rgba(139, 92, 246, 0.15) inset;
+      backdrop-filter: blur(12px);
+    }
+    .goal-pill-text {
+      letter-spacing: 0.02em;
+    }
+    #btn-edit-goal {
+      background: transparent;
+      border: none;
+      color: rgba(167, 139, 250, 0.7);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    #btn-edit-goal:hover {
+      color: #c4b5fd;
+    }
+    
+    .topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+
+    /* ── Cards grid ────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ── Glass card ────────────────────────────────── */
+    .glass-card {
+      background: rgba(24,24,27,0.7);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 20px;
+      padding: 1.75rem;
+      backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+    .glass-card:hover {
+      border-color: rgba(99,102,241,0.3);
+      box-shadow: 0 0 0 1px rgba(99,102,241,0.1), 0 20px 60px rgba(0,0,0,0.4);
+      transform: translateY(-2px);
+    }
+    .glass-card .card-shine {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Card content */
+    .card-tag {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .card-tag.indigo {
+      background: rgba(99,102,241,0.15);
+      border: 1px solid rgba(99,102,241,0.3);
+      color: #a5b4fc;
+    }
+    .card-tag.violet {
+      background: rgba(139,92,246,0.15);
+      border: 1px solid rgba(139,92,246,0.3);
+      color: #c4b5fd;
+    }
+    .card-tag.emerald {
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: #6ee7b7;
+    }
+    .card-tag.amber {
+      background: rgba(245,158,11,0.12);
+      border: 1px solid rgba(245,158,11,0.3);
+      color: #fcd34d;
+    }
+
+    .card-value {
+      font-size: 2.25rem; font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #f4f4f5;
+      line-height: 1;
+      margin-bottom: 0.4rem;
+    }
+    .card-label {
+      font-size: 0.8rem; color: #71717a; font-weight: 400;
+    }
+    .card-icon {
+      position: absolute; bottom: 1.25rem; right: 1.5rem;
+      font-size: 2.5rem; opacity: 0.06;
+      pointer-events: none;
+      transition: opacity 0.25s;
+    }
+    .glass-card:hover .card-icon { opacity: 0.1; }
+
+    /* ── Dream goal banner ─────────────────────────── */
+    .goal-banner {
+      background: linear-gradient(135deg,
+        rgba(99,102,241,0.18) 0%,
+        rgba(139,92,246,0.12) 50%,
+        rgba(167,139,250,0.08) 100%
+      );
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 20px;
+      padding: 2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+    }
+    .goal-banner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    }
+    .goal-banner-left { position: relative; z-index: 1; }
+    .goal-banner-eyebrow {
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: #a5b4fc; margin-bottom: 0.4rem;
+    }
+    .goal-banner-title {
+      font-size: 1.75rem; font-weight: 700;
+      background: linear-gradient(90deg, #f4f4f5, #c4b5fd);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+    .goal-banner-subtitle {
+      font-size: 0.82rem; color: #71717a; margin-top: 0.3rem;
+    }
+    .goal-banner-right { position: relative; z-index: 1; }
+
+    /* CTA button */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      font-size: 0.85rem; font-weight: 600;
+      text-decoration: none;
+      border: none; cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.25s;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+    }
+    .btn-primary:hover {
+      opacity: 0.92; transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(99,102,241,0.5);
+    }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.62rem 1.3rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      color: #a1a1aa;
+      font-size: 0.85rem; font-weight: 500;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.08);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.09);
+      color: #e4e4e7;
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    /* ── Activity row ──────────────────────────────── */
+    .section-title {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(161,161,170,0.6);
+      margin-bottom: 1rem;
+    }
+
+    .quick-actions {
+      display: flex; flex-wrap: wrap; gap: 0.75rem;
+    }
+
+    /* ── No-goal empty state ───────────────────────── */
+    .empty-goal-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 1.5rem;
+    }
+    .empty-icon {
+      font-size: 2.5rem; margin-bottom: 0.75rem;
+      filter: drop-shadow(0 0 12px rgba(99,102,241,0.5));
+    }
+    .empty-title { font-size: 1rem; font-weight: 600; color: #d4d4d8; margin-bottom: 0.3rem; }
+    .empty-sub { font-size: 0.8rem; color: #52525b; }
+
+    /* ── Scrollbar ─────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+
+    /* ── Fade-in animation ─────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.55s cubic-bezier(0.4,0,0.2,1) both; }
+    .delay-1 { animation-delay: 0.06s; }
+    .delay-2 { animation-delay: 0.12s; }
+    .delay-3 { animation-delay: 0.18s; }
+    .delay-4 { animation-delay: 0.26s; }
+
+    /* ══════════════════════════════════════════════════
+       ONBOARDING MODAL
+    ═══════════════════════════════════════════════════ */
+    #goal-modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px) saturate(160%);
+      -webkit-backdrop-filter: blur(10px) saturate(160%);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #goal-modal-backdrop.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* Modal card */
+    #goal-modal {
+      width: 100%; max-width: 480px;
+      background: rgba(18, 18, 20, 0.92);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 24px;
+      padding: 2.5rem 2.25rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transform: translateY(28px) scale(0.97);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+      opacity: 0;
+      box-shadow:
+        0 0 0 1px rgba(99,102,241,0.1),
+        0 32px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(99,102,241,0.08) inset;
+    }
+    #goal-modal-backdrop.visible #goal-modal {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    /* Decorative top glow stripe */
+    #goal-modal::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent 0%, rgba(99,102,241,0.8) 40%,
+        rgba(139,92,246,0.8) 60%, transparent 100%
+      );
+    }
+    /* Card inner shine */
+    #goal-modal::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 55%);
+      pointer-events: none;
+    }
+
+    /* Modal symbol / icon */
+    .modal-icon-wrap {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(99,102,241,0.25) 0%, rgba(139,92,246,0.2) 100%);
+      border: 1px solid rgba(99,102,241,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 20px rgba(99,102,241,0.2);
+    }
+
+    .modal-eyebrow {
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: #a5b4fc;
+      margin-bottom: 0.45rem;
+    }
+    .modal-title {
+      font-size: 1.55rem; font-weight: 700;
+      color: #f4f4f5;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, #f4f4f5 60%, #c4b5fd 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .modal-desc {
+      font-size: 0.83rem; color: #71717a; line-height: 1.6;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Input */
+    .modal-input-wrap {
+      position: relative; margin-bottom: 1.25rem;
+    }
+    #goal-input {
+      width: 100%;
+      padding: 0.85rem 1.1rem;
+      background: rgba(39,39,42,0.7);
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 14px;
+      color: #e4e4e7;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      caret-color: #a5b4fc;
+    }
+    #goal-input::placeholder { color: #52525b; }
+    #goal-input:focus {
+      border-color: rgba(99,102,241,0.6);
+      background: rgba(39,39,42,0.9);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12), 0 0 20px rgba(99,102,241,0.06);
+    }
+
+    /* Suggestions row */
+    .modal-suggestions {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 1.75rem;
+    }
+    .suggestion-chip {
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(39,39,42,0.6);
+      color: #a1a1aa;
+      font-size: 0.72rem; font-weight: 500;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+      user-select: none;
+    }
+    .suggestion-chip:hover {
+      background: rgba(99,102,241,0.15);
+      border-color: rgba(99,102,241,0.4);
+      color: #a5b4fc;
+    }
+
+    /* Action area */
+    .modal-actions {
+      display: flex; gap: 0.75rem; align-items: center;
+    }
+    #modal-submit {
+      flex: 1;
+      padding: 0.8rem 1.2rem;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: #fff;
+      font-size: 0.9rem; font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      border: none; cursor: pointer;
+      transition: opacity 0.2s, transform 0.18s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+      position: relative; overflow: hidden;
+    }
+    #modal-submit:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(99,102,241,0.55);
+    }
+    #modal-submit:disabled {
+      opacity: 0.5; cursor: not-allowed;
+    }
+    #modal-submit .btn-spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: -2px; margin-right: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #modal-skip {
+      padding: 0.75rem 1rem;
+      border-radius: 13px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #52525b;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    #modal-skip:hover { color: #a1a1aa; border-color: rgba(255,255,255,0.18); }
+
+    /* Error message */
+    #modal-error {
+      display: none;
+      margin-top: 0.85rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5;
+      font-size: 0.78rem;
+    }
+  </style>
 </head>
 
-<body class="min-h-screen bg-black text-white">
-  <main class="mx-auto w-full max-w-4xl px-6 py-16">
-    <h1 class="text-3xl font-semibold tracking-tight">Home</h1>
-    <p class="mt-3 text-white/70">
-      Tailwind is available on this page now. Next we’ll design your real home
-      screen.
-    </p>
-    <div class="mt-8">
-      <a href="{% url 'session_hub' %}"
-        class="inline-flex cursor-pointer items-center justify-center rounded-md border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-900 shadow-sm hover:bg-neutral-50 transition-colors">
-        Go to Session Hub (Temporary)
-      </a>
-    </div>
-  </main>
-</body>
+<body>
 
+  <!-- Ambient glows -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- ════════════════════════════════════════════════
+       ONBOARDING MODAL
+  ═════════════════════════════════════════════════ -->
+  <div id="goal-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div id="goal-modal">
+
+      <!-- Icon -->
+      <div class="modal-icon-wrap">🎯</div>
+
+      <!-- Copy -->
+      <p class="modal-eyebrow">Flow · Onboarding</p>
+      <h2 class="modal-title" id="modal-title">Core Ambition</h2>
+      <p class="modal-desc">
+        Tell Flow what you're striving for. This single line of intent will
+        personalise your motivation feed and news briefing every single day.
+      </p>
+
+      <!-- Input -->
+      <div class="modal-input-wrap">
+        <input
+          id="goal-input"
+          type="text"
+          placeholder="e.g. IAS Officer, Software Engineer, Entrepreneur…"
+          maxlength="255"
+          autocomplete="off"
+          spellcheck="false"
+          autofocus
+        />
+      </div>
+
+      <!-- Quick-pick suggestion chips -->
+      <div class="modal-suggestions" id="modal-chips">
+        <span class="suggestion-chip" data-goal="IAS Officer">IAS Officer</span>
+        <span class="suggestion-chip" data-goal="UPSC">UPSC</span>
+        <span class="suggestion-chip" data-goal="Software Engineer">Software Engineer</span>
+        <span class="suggestion-chip" data-goal="Data Scientist">Data Scientist</span>
+        <span class="suggestion-chip" data-goal="Entrepreneur">Entrepreneur</span>
+        <span class="suggestion-chip" data-goal="Doctor">Doctor</span>
+        <span class="suggestion-chip" data-goal="CA">CA</span>
+        <span class="suggestion-chip" data-goal="Pilot">Pilot</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button id="modal-submit" type="button">Initialize Path</button>
+        <button id="modal-skip" type="button">Skip for now</button>
+      </div>
+
+      <!-- Error -->
+      <div id="modal-error" role="alert"></div>
+
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════
+       SIDEBAR
+  ═════════════════════════════════════════════════ -->
+  <div id="sidebar-overlay" aria-hidden="true"></div>
+
+  <aside id="sidebar" aria-label="Dashboard sidebar">
+
+    <!-- Brand mark -->
+    <div class="sidebar-brand">
+      <div class="logo-mark">F</div>
+      <span>FLOW</span>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav" aria-label="Primary navigation">
+      <a href="{% url 'home' %}" class="active" id="nav-home">
+        <span class="nav-icon">⌂</span> Dashboard
+      </a>
+      <a href="{% url 'session_hub' %}" id="nav-session">
+        <span class="nav-icon">◎</span> Session Hub
+      </a>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- ── Motivation section ── -->
+    <div>
+      <p class="sidebar-label">✦ Motivation</p>
+      <div class="quote-card">
+        <p class="quote-text" id="sidebar-quote">{{ random_quote }}</p>
+        <span class="quote-accent"></span>
+      </div>
+    </div>
+
+    <!-- ── Latest Intel section ── -->
+    <div style="flex:1;">
+      <p class="sidebar-label">◉ Latest Intel</p>
+      <div class="intel-card">
+        <div class="intel-header">
+          <div class="intel-dot"></div>
+          <span class="intel-title">Tracking topic</span>
+        </div>
+        <p class="intel-query" id="sidebar-intel-query">{{ news_query }}</p>
+        
+        <div style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
+          {% if news_items %}
+            {% for item in news_items %}
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); padding:0.65rem; border-radius:8px;">
+              <p style="font-size:0.75rem; line-height:1.4; color:#d4d4d8; margin:0 0 0.35rem 0;">{{ item.title }}</p>
+              <a href="{{ item.url }}" target="_blank" style="font-size:0.65rem; color:#a5b4fc; text-decoration:none;">{{ item.source }} ↗</a>
+            </div>
+            {% endfor %}
+          {% else %}
+            <p style="font-size:0.75rem; color:#71717a;">No recent intel available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- User info -->
+    <div class="sidebar-divider"></div>
+    <div style="display:flex; align-items:center; gap:0.65rem; padding:0.25rem 0;">
+      <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                  display:flex; align-items:center; justify-content:center;
+                  font-size:0.8rem; font-weight:700; color:#fff; flex-shrink:0;">
+        {{ request.user.username|slice:":1"|upper }}
+      </div>
+      <div style="flex:1; min-width:0;">
+        <p style="font-size:0.82rem; font-weight:600; color:#d4d4d8; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          {{ request.user.username }}
+        </p>
+        <p style="font-size:0.7rem; color:#52525b; margin:0;">Free plan</p>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ════════════════════════════════════════════════
+       MAIN SHELL
+  ═════════════════════════════════════════════════ -->
+  <div class="shell">
+
+    <!-- Floating toggle button -->
+    <button id="sidebar-toggle" aria-label="Toggle sidebar" aria-expanded="false" aria-controls="sidebar">
+      <!-- Chevron right icon — rotates to chevron left when open -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- ── Main content ───────────────────────────── -->
+    <main class="main-content" id="main-content">
+
+      <!-- Top bar -->
+      <header class="topbar fade-up">
+        <div class="topbar-greeting">
+          <span class="eyebrow">Good to see you back</span>
+          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <h1>Hey, {{ request.user.first_name|default:request.user.username }} 👋</h1>
+            {% if dream_goal %}
+            <div class="goal-pill">
+              <span class="goal-pill-text">Targeting: <strong>{{ dream_goal }}</strong></span>
+              <button id="btn-edit-goal" title="Edit Goal">✎</button>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="topbar-actions">
+        </div>
+      </header>
+
+      <!-- ── Quick actions ───────────── -->
+      <div class="fade-up delay-1">
+        <p class="section-title">Quick Actions</p>
+        <div class="quick-actions">
+          <a href="{% url 'session_hub' %}" class="btn-primary" id="qa-focus">▶ Start Focus</a>
+        </div>
+      </div>
+
+    </main>
+  </div><!-- /.shell -->
+
+  <!-- ════════════════════════════════════════════════
+       JAVASCRIPT
+  ═════════════════════════════════════════════════ -->
+  <script>
+    /* ═══════════════════════════════════════════════════
+       CSRF helper — reads the csrftoken Django cookie
+    ════════════════════════════════════════════════════ */
+    function getCsrf() {
+      const m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+      return m ? decodeURIComponent(m[1]) : '';
+    }
+
+    /* ═══════════════════════════════════════════════════
+       SIDEBAR TOGGLE
+    ════════════════════════════════════════════════════ */
+    const sidebar        = document.getElementById('sidebar');
+    const sidebarToggle  = document.getElementById('sidebar-toggle');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const mainContent    = document.getElementById('main-content');
+    const qaToggle       = document.getElementById('qa-toggle-sidebar');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      sidebarToggle.classList.add('active');
+      sidebarOverlay.classList.add('visible');
+      sidebarToggle.setAttribute('aria-expanded', 'true');
+      if (window.innerWidth >= 900) mainContent.classList.add('shifted');
+    }
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      sidebarToggle.classList.remove('active');
+      sidebarOverlay.classList.remove('visible');
+      sidebarToggle.setAttribute('aria-expanded', 'false');
+      mainContent.classList.remove('shifted');
+    }
+    function toggleSidebar() {
+      sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+    }
+
+    sidebarToggle.addEventListener('click', toggleSidebar);
+    sidebarOverlay.addEventListener('click', closeSidebar);
+    if (qaToggle) qaToggle.addEventListener('click', toggleSidebar);
+    mainContent.addEventListener('click', () => {
+      if (sidebar.classList.contains('open')) closeSidebar();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar();
+    });
+
+
+
+    /* ═══════════════════════════════════════════════════
+       DREAM GOAL — core save function (calls real API)
+    ════════════════════════════════════════════════════ */
+    const DREAM_GOAL_API = '{% url "update_dream_goal" %}';
+
+    /**
+     * POST the new dream goal to the backend.
+     * @param {string} goal
+     * @returns {Promise<{ok: boolean, goal: string, error: string}>}
+     */
+    async function postDreamGoal(goal) {
+      const res = await fetch(DREAM_GOAL_API, {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken':  getCsrf(),
+        },
+        body: JSON.stringify({ dream_goal: goal }),
+      });
+
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { ok: false, error: json.message || 'Something went wrong. Please retry.' };
+      }
+      return { ok: true, goal: json.dream_goal || goal };
+    }
+
+    /**
+     * Update the visible DOM elements that display the dream goal,
+     * then reload so Django can re-render the full template.
+     * A clean reload is necessary because the sidebar intel and
+     * goal banner are Django-template-rendered (server-side).
+     */
+    function applyGoalToDOM(newGoal) {
+      // 1. Sidebar intel query — update text immediately
+      const intelEl = document.getElementById('sidebar-intel-query');
+      if (intelEl) {
+        intelEl.textContent = newGoal + ' career success stories';
+      }
+      // 2. Full page reload so the Django template re-renders
+      //    the goal banner, badge, and news_query correctly.
+      window.location.reload();
+    }
+
+    /* ═══════════════════════════════════════════════════
+       ONBOARDING MODAL
+    ════════════════════════════════════════════════════ */
+    const backdrop    = document.getElementById('goal-modal-backdrop');
+    const goalInput   = document.getElementById('goal-input');
+    const submitBtn   = document.getElementById('modal-submit');
+    const skipBtn     = document.getElementById('modal-skip');
+    const errorBox    = document.getElementById('modal-error');
+    const chipList    = document.getElementById('modal-chips');
+
+    function showModal() {
+      if (!backdrop) return;
+      backdrop.classList.add('visible');
+      if (goalInput) setTimeout(() => goalInput.focus(), 320);
+    }
+    function hideModal() {
+      if (!backdrop) return;
+      backdrop.classList.remove('visible');
+    }
+    function showModalError(msg) {
+      if (!errorBox) return;
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+    function clearModalError() {
+      if (!errorBox) return;
+      errorBox.style.display = 'none';
+      errorBox.textContent = '';
+    }
+    function setSubmitLoading(loading) {
+      if (!submitBtn) return;
+      submitBtn.disabled = loading;
+      submitBtn.innerHTML = loading
+        ? '<span class="btn-spinner"></span>Saving…'
+        : 'Initialize Path';
+    }
+
+    // Auto-show modal when there is no dream goal
+    const hasGoal = '{% if dream_goal %}true{% else %}{% endif %}';
+    if (backdrop) {
+      if (!hasGoal) {
+        // Small delay so the page renders first
+        setTimeout(showModal, 450);
+      }
+
+      // Suggestion chips → populate input
+      if (chipList) {
+        chipList.addEventListener('click', e => {
+          const chip = e.target.closest('.suggestion-chip');
+          if (!chip) return;
+          if (goalInput) goalInput.value = chip.dataset.goal;
+          goalInput && goalInput.focus();
+        });
+      }
+
+      // Submit handler
+      async function handleModalSubmit() {
+        clearModalError();
+        const val = goalInput ? goalInput.value.trim() : '';
+        if (!val) {
+          showModalError('Please type your dream goal or pick one from the suggestions.');
+          goalInput && goalInput.focus();
+          return;
+        }
+        setSubmitLoading(true);
+        const result = await postDreamGoal(val);
+        setSubmitLoading(false);
+        if (!result.ok) {
+          showModalError(result.error);
+          return;
+        }
+        hideModal();
+        applyGoalToDOM(result.goal);
+      }
+
+      submitBtn && submitBtn.addEventListener('click', handleModalSubmit);
+      goalInput && goalInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') handleModalSubmit();
+      });
+
+      // Skip → close modal without saving
+      skipBtn && skipBtn.addEventListener('click', hideModal);
+
+      // Close on backdrop click (outside modal card)
+      backdrop.addEventListener('click', e => {
+        if (e.target === backdrop) hideModal();
+      });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && backdrop.classList.contains('visible')) hideModal();
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════
+       INLINE EDIT — Edit Goal button (when goal already set)
+    ════════════════════════════════════════════════════ */
+    const btnEdit = document.getElementById('btn-edit-goal');
+    if (btnEdit) {
+      btnEdit.addEventListener('click', () => {
+        const current = '{{ dream_goal|escapejs }}';
+        if (goalInput) goalInput.value = current;
+        showModal();
+      });
+    }
+
+    /* ═══════════════════════════════════════════════════
+       BOOT
+    ════════════════════════════════════════════════════ */
+    window.addEventListener('load', () => {
+      openSidebar();
+    });
+  </script>
+
+</body>
 </html>
