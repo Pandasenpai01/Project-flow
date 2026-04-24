@@ -83,6 +83,7 @@
       transform: translateX(-100%);
       transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 50;
+      overflow-y: auto;
     }
     #sidebar.open { transform: translateX(0); }
 
@@ -274,9 +275,9 @@
 
     /* ── Top bar ───────────────────────────────────── */
     .topbar {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
       align-items: center;
-      justify-content: space-between;
       margin-bottom: 3rem;
       padding-left: 3.5rem; /* clear the toggle button */
     }
@@ -327,83 +328,19 @@
     
     .topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
 
-    /* ── Cards grid ────────────────────────────────── */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.25rem;
-      margin-bottom: 2rem;
-    }
-
-    /* ── Glass card ────────────────────────────────── */
-    .glass-card {
-      background: rgba(24,24,27,0.7);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 20px;
-      padding: 1.75rem;
-      backdrop-filter: blur(16px);
-      position: relative;
-      overflow: hidden;
-      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
-    }
-    .glass-card:hover {
-      border-color: rgba(99,102,241,0.3);
-      box-shadow: 0 0 0 1px rgba(99,102,241,0.1), 0 20px 60px rgba(0,0,0,0.4);
-      transform: translateY(-2px);
-    }
-    .glass-card .card-shine {
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%);
+    /* ── Spotlight Cursor Effect ───────────────────── */
+    .spotlight {
+      position: fixed;
+      inset: 0;
       pointer-events: none;
+      z-index: 0;
+      opacity: 0.95;
+      background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 40%),
+          rgba(255, 255, 255, 0.12),
+          rgba(255, 255, 255, 0.06) 26%,
+          rgba(0, 0, 0, 0) 60%);
+      mix-blend-mode: screen;
     }
-
-    /* Card content */
-    .card-tag {
-      display: inline-flex; align-items: center; gap: 0.4rem;
-      padding: 0.2rem 0.65rem;
-      border-radius: 999px;
-      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.14em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-    }
-    .card-tag.indigo {
-      background: rgba(99,102,241,0.15);
-      border: 1px solid rgba(99,102,241,0.3);
-      color: #a5b4fc;
-    }
-    .card-tag.violet {
-      background: rgba(139,92,246,0.15);
-      border: 1px solid rgba(139,92,246,0.3);
-      color: #c4b5fd;
-    }
-    .card-tag.emerald {
-      background: rgba(16,185,129,0.12);
-      border: 1px solid rgba(16,185,129,0.3);
-      color: #6ee7b7;
-    }
-    .card-tag.amber {
-      background: rgba(245,158,11,0.12);
-      border: 1px solid rgba(245,158,11,0.3);
-      color: #fcd34d;
-    }
-
-    .card-value {
-      font-size: 2.25rem; font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #f4f4f5;
-      line-height: 1;
-      margin-bottom: 0.4rem;
-    }
-    .card-label {
-      font-size: 0.8rem; color: #71717a; font-weight: 400;
-    }
-    .card-icon {
-      position: absolute; bottom: 1.25rem; right: 1.5rem;
-      font-size: 2.5rem; opacity: 0.06;
-      pointer-events: none;
-      transition: opacity 0.25s;
-    }
-    .glass-card:hover .card-icon { opacity: 0.1; }
 
     /* ── Dream goal banner ─────────────────────────── */
     .goal-banner {
@@ -725,6 +662,8 @@
 
 <body>
 
+  <div class="spotlight" aria-hidden="true"></div>
+
   <!-- Ambient glows -->
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
@@ -829,12 +768,16 @@
         </div>
         <p class="intel-query" id="sidebar-intel-query">{{ news_query }}</p>
         
-        <div style="margin-top:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-          {% if news_items %}
+        <div id="news-ticker-container" style="margin-top:0.75rem; display:grid; grid-template-columns:1fr; grid-template-rows:1fr;">
+          {% if news_items is None %}
+            <p style="font-size:0.75rem; color:#fca5a5;">News currently unavailable</p>
+          {% elif news_items %}
             {% for item in news_items %}
-            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); padding:0.65rem; border-radius:8px;">
-              <p style="font-size:0.75rem; line-height:1.4; color:#d4d4d8; margin:0 0 0.35rem 0;">{{ item.title }}</p>
-              <a href="{{ item.url }}" target="_blank" style="font-size:0.65rem; color:#a5b4fc; text-decoration:none;">{{ item.source }} ↗</a>
+            <div class="news-ticker-item" style="grid-column:1 / -1; grid-row:1 / -1; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); padding:0.65rem; border-radius:8px; transition: opacity 0.6s ease; {% if forloop.first %}opacity:1; pointer-events:auto; z-index:2;{% else %}opacity:0; pointer-events:none; z-index:1;{% endif %}">
+              <a href="{{ item.url }}" target="_blank" style="text-decoration:none; display:block;">
+                <p style="font-size:0.75rem; line-height:1.4; color:#d4d4d8; margin:0 0 0.35rem 0;">{{ item.title }}</p>
+                <span style="font-size:0.65rem; color:#a5b4fc;">via {{ item.source }} ↗</span>
+              </a>
             </div>
             {% endfor %}
           {% else %}
@@ -880,18 +823,20 @@
 
       <!-- Top bar -->
       <header class="topbar fade-up">
-        <div class="topbar-greeting">
+        <div class="topbar-greeting" style="justify-self: start;">
           <span class="eyebrow">Good to see you back</span>
-          <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <h1>Hey, {{ request.user.first_name|default:request.user.username }} 👋</h1>
-            {% if dream_goal %}
-            <div class="goal-pill">
-              <span class="goal-pill-text">Targeting: <strong>{{ dream_goal }}</strong></span>
-              <button id="btn-edit-goal" title="Edit Goal">✎</button>
-            </div>
-            {% endif %}
-          </div>
+          <h1>Hey, {{ request.user.first_name|default:request.user.username }} 👋</h1>
         </div>
+        
+        <div class="topbar-middle" style="justify-self: center;">
+          {% if dream_goal %}
+          <div class="goal-pill">
+            <span class="goal-pill-text">Targeting: <strong>{{ dream_goal }}</strong></span>
+            <button id="btn-edit-goal" title="Edit Goal">✎</button>
+          </div>
+          {% endif %}
+        </div>
+
         <div class="topbar-actions">
         </div>
       </header>
@@ -1112,6 +1057,36 @@
     window.addEventListener('load', () => {
       openSidebar();
     });
+
+    // Spotlight Cursor Follower
+    (() => {
+      const root = document.documentElement;
+      function setSpotlight(x, y) {
+        root.style.setProperty("--mx", `${x}px`);
+        root.style.setProperty("--my", `${y}px`);
+      }
+      window.addEventListener("pointermove", (e) => setSpotlight(e.clientX, e.clientY), { passive: true });
+      setSpotlight(Math.round(window.innerWidth * 0.5), Math.round(window.innerHeight * 0.42));
+    })();
+
+    // News Ticker Logic
+    (() => {
+      const newsItems = document.querySelectorAll('.news-ticker-item');
+      if (newsItems.length > 1) {
+        let currentIdx = 0;
+        setInterval(() => {
+          newsItems[currentIdx].style.opacity = '0';
+          newsItems[currentIdx].style.pointerEvents = 'none';
+          newsItems[currentIdx].style.zIndex = '1';
+          
+          currentIdx = (currentIdx + 1) % newsItems.length;
+          
+          newsItems[currentIdx].style.opacity = '1';
+          newsItems[currentIdx].style.pointerEvents = 'auto';
+          newsItems[currentIdx].style.zIndex = '2';
+        }, 8000);
+      }
+    })();
   </script>
 
 </body>

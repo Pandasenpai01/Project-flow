@@ -40,34 +40,12 @@ _MOTIVATIONAL_QUOTES = [
 ]
 
 # ---------------------------------------------------------------------------
-# Goal → News-API query mapping
-# ---------------------------------------------------------------------------
-_GOAL_QUERY_MAP = {
-    "ias": "IAS officer success stories",
-    "upsc": "UPSC topper interview tips",
-    "doctor": "medical school success inspiration",
-    "engineer": "engineering career breakthroughs",
-    "software engineer": "software engineering career growth",
-    "developer": "software developer career tips",
-    "data scientist": "data science career success",
-    "entrepreneur": "startup founder success stories",
-    "ca": "chartered accountant career success",
-    "lawyer": "law career success stories",
-    "neet": "NEET topper success tips",
-    "jee": "JEE topper strategies",
-    "gmat": "GMAT MBA success stories",
-    "pilot": "airline pilot career journey",
-    "teacher": "inspiring teacher career stories",
-}
-
 
 def _fetch_news_for_goal(query):
     """Fetch real-time news headlines based on the query."""
-    api_key = getattr(settings, 'NEWSAPI_KEY', None)
-    if not api_key or api_key.startswith('YOUR_'):
-        return []
+    api_key = "b064798bc1664334879fc4c5e0ecd4b2"
 
-    url = f"https://newsapi.org/v2/everything?q={query}&sortBy=relevancy&pageSize=3&language=en&apiKey={api_key}"
+    url = f"https://newsapi.org/v2/everything?q={query}&sortBy=publishedAt&pageSize=5&language=en&apiKey={api_key}"
     try:
         response = requests.get(url, timeout=4)
         if response.status_code == 200:
@@ -84,7 +62,7 @@ def _fetch_news_for_goal(query):
     except Exception as e:
         import logging
         logging.getLogger(__name__).warning("News API fetch failed: %s", e)
-    return []
+    return None
 
 @login_required
 def home(request):
@@ -95,11 +73,7 @@ def home(request):
     random_quote = random.choice(_MOTIVATIONAL_QUOTES)
 
     # Build a news query tailored to the dream goal
-    goal_lower = (profile.dream_goal or "").strip().lower()
-    news_query = _GOAL_QUERY_MAP.get(
-        goal_lower,
-        f"{profile.dream_goal} career success stories" if profile.dream_goal else "productivity and success",
-    )
+    news_query = profile.dream_goal.strip() if profile.dream_goal else "productivity and success"
     
     news_items = _fetch_news_for_goal(news_query)
 
