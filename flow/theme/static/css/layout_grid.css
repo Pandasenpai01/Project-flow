@@ -1,0 +1,211 @@
+/* ============================================================
+   Project-Flow — Layout Grid Foundation
+   Static 3-column layout where center never shifts.
+   Activated by adding class "grid-layout" on <body>.
+   ============================================================ */
+
+@import url('theme.css');
+
+/* Base background (safe for all pages) */
+html, body{
+  min-height: 100%;
+}
+
+body{
+  margin: 0;
+  width: 100%;
+  background:
+    radial-gradient(900px 520px at 50% 35%, rgba(124, 109, 250, 0.08), transparent 62%),
+    linear-gradient(180deg, rgba(0,0,0,0.92) 0%, rgba(10,14,26,0.94) 45%, rgba(10,14,26,0.98) 100%);
+  color: var(--color-text-sidebar);
+  overflow-x: hidden;
+}
+
+/* Subtle grain/noise overlay */
+body::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 2px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 3px);
+  opacity: 0.45;
+}
+
+/* ============================================================
+   Grid layout (opt-in via body.grid-layout)
+   ============================================================ */
+body.grid-layout{
+  display: grid;
+  grid-template-columns:
+    [left-start] var(--sidebar-width-left)
+    [left-end center-start] 1fr
+    [center-end right-start] var(--sidebar-width-right)
+    [right-end];
+  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Ensure main columns are above the background overlay */
+body.grid-layout > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* Left sidebar column */
+body.grid-layout #left-sidebar{
+  grid-column: left-start / left-end;
+  grid-row: 1 / -1;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* Center content column */
+body.grid-layout #content-wrapper{
+  grid-column: center-start / center-end;
+  grid-row: 1 / -1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  min-width: 0;
+  height: 100vh;
+  padding: 2rem 3rem;
+  background:
+    radial-gradient(800px 520px at 50% 20%, rgba(124, 109, 250, 0.09), transparent 60%),
+    radial-gradient(1200px 700px at 50% 100%, rgba(139, 92, 246, 0.06), transparent 55%);
+}
+
+/* Optional inner wrapper for perfectly centered content */
+.content-center-wrapper{
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  min-width: 0;
+}
+
+/* Right sidebar column */
+body.grid-layout #right-sidebar{
+  grid-column: right-start / right-end;
+  grid-row: 1 / -1;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+/* ============================================================
+   Sidebar visibility states (CSS-only toggles)
+   - keeps center column assignment unchanged
+   - supports both new and existing JS class names
+   ============================================================ */
+
+/* Left */
+body.left-sidebar-hidden #left-sidebar,
+body.sidebar-collapsed #left-sidebar{
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+/* Right */
+body.right-sidebar-hidden #right-sidebar,
+body.right-sidebar-collapsed #right-sidebar{
+  transform: translateX(100%);
+  pointer-events: none;
+}
+
+/* ============================================================
+   Scrollbar styling
+   ============================================================ */
+::-webkit-scrollbar{ width: 6px; height: 6px; }
+::-webkit-scrollbar-track{ background: transparent; }
+::-webkit-scrollbar-thumb{
+  background: rgba(255,255,255,0.10);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.18); }
+
+/* ============================================================
+   Utility classes
+   ============================================================ */
+.sidebar-toggle-btn{
+  position: fixed;
+  z-index: var(--z-button-toggle);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-medium);
+  background: rgba(10,14,26,0.78);
+  color: var(--color-text-sidebar);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-toggle);
+  transition: transform 0.12s, background 0.15s, border-color 0.15s;
+}
+.sidebar-toggle-btn:hover{
+  transform: translateY(-1px);
+  background: rgba(124,109,250,0.14);
+  border-color: var(--color-border-accent-medium);
+}
+
+.nav-breadcrumb{
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ls-muted);
+}
+
+.card-glass{
+  background: var(--color-panel-light);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+}
+
+/* ============================================================
+   Responsive behavior
+   ============================================================ */
+@media (max-width: 1200px){
+  body.grid-layout{
+    grid-template-columns: [left-start] var(--sidebar-width-left) [left-end center-start] 1fr [center-end];
+  }
+
+  body.grid-layout #right-sidebar{
+    position: fixed;
+    top: 0;
+    right: 0;
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 860px){
+  body.grid-layout{
+    grid-template-columns: 1fr;
+  }
+
+  body.grid-layout #content-wrapper{
+    grid-column: 1;
+    padding: 1.5rem 1.25rem;
+  }
+
+  body.grid-layout #left-sidebar,
+  body.grid-layout #right-sidebar{
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    z-index: var(--z-sidebar);
+  }
+
+  body.grid-layout #left-sidebar{ left: 0; }
+  body.grid-layout #right-sidebar{ right: 0; }
+}
+

@@ -1,0 +1,205 @@
+/* ============================================================
+   FLOW — Unified Design Token System (theme.css)
+   All colors, spacing, shadows, radii, transitions, z-index,
+   and semantic tokens live here. Every other CSS file imports
+   or inherits these variables — no hardcoded values allowed.
+   ============================================================ */
+
+:root {
+
+  /* ── Background Palette ──────────────────────────────── */
+  --color-bg-primary: #0a0a0a;           /* deepest black              */
+  --color-bg-secondary: #09090b;         /* zinc-950                   */
+  --color-bg-tertiary: #18181b;          /* zinc-900                   */
+  --color-bg-deep: #0a0e1a;             /* legacy deep navy-black     */
+  --color-bg-darker: #080c18;           /* session hub background      */
+  --color-bg-overlay: rgba(0, 0, 0, 0.55);
+
+  /* ── Accent Palette ──────────────────────────────────── */
+  --color-accent-primary: #8b5cf6;       /* Electric Purple (main)     */
+  --color-accent-secondary: #7c6dfa;     /* Sidebar purple             */
+  --color-accent-light: #a5b4fc;         /* Light purple links/text    */
+  --color-accent-lighter: #c4b5fd;       /* Even lighter purple        */
+  --color-accent-dark: #6366f1;          /* Indigo, darker accent      */
+  --color-accent-blue: #3b9eff;          /* Blue accent (session hub)  */
+  --color-accent-cyan: #2fe6c2;          /* Cyan / teal                */
+  --color-accent-emerald: #10b981;       /* Emerald green              */
+  --color-accent-red: #ff4d6d;           /* Red / pink (warnings)      */
+  --color-accent-yellow: #f5c842;        /* Yellow (medium priority)   */
+
+  /* ── Text Palette ────────────────────────────────────── */
+  --color-text-primary: #f4f4f5;         /* brightest white text       */
+  --color-text-secondary: #e4e4e7;       /* zinc-200, default body     */
+  --color-text-tertiary: #d4d4d8;        /* zinc-300, dimmer           */
+  --color-text-muted: #a1a1aa;           /* zinc-400, very muted       */
+  --color-text-disabled: #71717a;        /* zinc-500, disabled/faded   */
+  --color-text-faint: #52525b;           /* zinc-600, very faint       */
+  --color-text-sidebar: #e8ecff;         /* sidebar text               */
+
+  /* ── Border Palette ──────────────────────────────────── */
+  --color-border-light: rgba(255, 255, 255, 0.07);
+  --color-border-medium: rgba(255, 255, 255, 0.1);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+  --color-border-soft: rgba(255, 255, 255, 0.08);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-faint: rgba(255, 255, 255, 0.05);
+  --color-border-accent: rgba(139, 92, 246, 0.25);
+  --color-border-accent-soft: rgba(124, 109, 250, 0.20);
+  --color-border-accent-light: rgba(139, 92, 246, 0.3);
+  --color-border-accent-medium: rgba(124, 109, 250, 0.35);
+  --color-border-accent-strong: rgba(124, 109, 250, 0.45);
+  --color-border-accent-focus: rgba(124, 109, 250, 0.55);
+
+  /* ── Panel / Card Backgrounds ────────────────────────── */
+  --color-panel-light: rgba(255, 255, 255, 0.04);
+  --color-panel-medium: rgba(255, 255, 255, 0.06);
+  --color-panel-hover: rgba(255, 255, 255, 0.085);
+  --color-panel-subtle: rgba(255, 255, 255, 0.03);
+  --color-panel-faint: rgba(255, 255, 255, 0.05);
+  --color-panel-dark: rgba(39, 39, 42, 0.6);
+  --color-panel-darker: rgba(24, 24, 27, 0.72);
+  --color-panel-overlay: rgba(10, 14, 26, 0.92);
+  --color-panel-modal: rgba(18, 18, 20, 0.92);
+
+  /* ── Shadow Palette ──────────────────────────────────── */
+  --shadow-sm: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --shadow-xl: 0 32px 80px rgba(0, 0, 0, 0.6);
+  --shadow-button: 0 4px 20px rgba(139, 92, 246, 0.35);
+  --shadow-button-hover: 0 8px 28px rgba(139, 92, 246, 0.55);
+  --shadow-button-indigo: 0 4px 20px rgba(99, 102, 241, 0.35);
+  --shadow-button-indigo-hover: 0 8px 28px rgba(99, 102, 241, 0.5);
+  --shadow-sidebar: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --shadow-toggle: 0 14px 40px rgba(0, 0, 0, 0.45);
+  --glow-accent: 0 0 20px rgba(139, 92, 246, 0.2);
+  --glow-accent-strong: 0 0 16px rgba(99, 102, 241, 0.5);
+  --glow-cyan: 0 0 18px rgba(47, 230, 194, 0.20);
+
+  /* ── Sizing / Spacing ────────────────────────────────── */
+  --sidebar-width-left: 280px;
+  --sidebar-width-right: 260px;
+  --content-max-width: 800px;
+  --content-max-width-lg: 900px;
+  --content-max-width-xl: 1000px;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+
+  /* ── Border Radius ───────────────────────────────────── */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 999px;
+
+  /* ── Transitions / Easing ────────────────────────────── */
+  --transition-fast: 0.12s;
+  --transition-normal: 0.28s;
+  --transition-slow: 0.35s;
+  --transition-slower: 0.38s;
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Z-Index Hierarchy ───────────────────────────────── */
+  --z-base: 1;
+  --z-content: 10;
+  --z-sidebar-overlay: 40;
+  --z-sidebar: 60;
+  --z-backdrop: 55;
+  --z-button-toggle: 70;
+  --z-sidebar-toggle: 100;
+  --z-modal: 200;
+  --z-tooltip: 300;
+  --z-toast: 9999;
+
+  /* ── Semantic Colors ─────────────────────────────────── */
+  --color-success: #10b981;
+  --color-warning: #f5c842;
+  --color-error: #ff4d6d;
+  --color-info: #8b5cf6;
+
+  /* ── Glassmorphism - Backdrop & Blur ───────────────── */
+  --glass-blur-sm: blur(8px);
+  --glass-blur-md: blur(12px);
+  --glass-blur-lg: blur(20px);
+  --glass-backdrop: rgba(255, 255, 255, 0.02);
+  --glass-backdrop-medium: rgba(255, 255, 255, 0.04);
+  --glass-backdrop-strong: rgba(255, 255, 255, 0.08);
+
+  /* ── Layered Depth Variables ─────────────────────── */
+  --depth-1: 0 2px 8px rgba(0, 0, 0, 0.1);     /* subtle, closest */
+  --depth-2: 0 4px 16px rgba(0, 0, 0, 0.15);    /* medium elevation */
+  --depth-3: 0 8px 32px rgba(0, 0, 0, 0.2);     /* elevated */
+  --depth-4: 0 16px 48px rgba(0, 0, 0, 0.25);    /* floating */
+  --depth-5: 0 20px 60px rgba(0, 0, 0, 0.55);    /* highest, used for sidebars */
+
+  /* ── Border Glow Variables ──────────────────────────── */
+  --border-glow-accent: inset 0 0 20px rgba(139, 92, 246, 0.1);      /* purple glow inset */
+  --border-glow-accent-light: inset 0 0 12px rgba(167, 139, 250, 0.05); /* light purple */
+  --border-glow-success: inset 0 0 15px rgba(16, 185, 129, 0.08);    /* emerald glow */
+
+  /* ── Card & Panel Backdrop Variables ────────────────── */
+  --card-bg-light: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+  --card-bg-accent: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+  --card-inner-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 55%);
+
+  /* ── Sidebar Legacy Aliases (smooth migration) ──────── */
+  --ls-bg: var(--color-bg-deep);
+  --ls-panel: var(--color-panel-light);
+  --ls-panel-2: var(--color-panel-medium);
+  --ls-border: var(--color-border-accent-soft);
+  --ls-border-soft: var(--color-border-soft);
+  --ls-text: var(--color-text-sidebar);
+  --ls-muted: rgba(232, 236, 255, 0.60);
+  --ls-accent: var(--color-accent-secondary);
+  --ls-accent-2: var(--color-accent-cyan);
+  --ls-shadow: var(--shadow-sidebar);
+}
+
+/* ── Glassmorphism Animations ───────────────────────────── */
+@keyframes glassSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes glassFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: var(--depth-2);
+  }
+  50% {
+    box-shadow: var(--depth-2), 0 0 20px rgba(139, 92, 246, 0.15);
+  }
+  100% {
+    box-shadow: var(--depth-2);
+  }
+}
+
+/* ── Reduced Motion Support ─────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,501 @@
+{% load tailwind_tags %}
+{% load static %}
+<!doctype html>
+<html lang="en" class="h-full">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flow · History & Insights</title>
+  {% tailwind_css %}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Nord-Dark Design Tokens ──────────────────── */
+    :root {
+      --primary-bg: #121212;
+      --surface-card: #1E1E1E;
+      --primary-accent: #81A1C1;
+      --secondary-accent: #A3BE8C;
+      --primary-text: #E5E9F0;
+      --muted-text: #707880;
+      --border-color: rgba(229, 233, 240, 0.1);
+    }
+
+    /* ── Base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--primary-bg, #121212);
+      color: var(--primary-text, #E5E9F0);
+      overflow-x: hidden;
+    }
+
+    /* ── Noise / grain texture overlay ────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Radial ambient glow ───────────────────────── */
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-1 {
+      width: 600px; height: 600px;
+      top: -200px; left: -200px;
+      background: radial-gradient(circle, rgba(129, 161, 193, 0.12) 0%, transparent 70%);
+    }
+    .glow-2 {
+      width: 500px; height: 500px;
+      bottom: -150px; right: -150px;
+      background: radial-gradient(circle, rgba(129, 161, 193, 0.12) 0%, transparent 70%);
+    }
+
+    /* ── Layout shell ──────────────────────────────── */
+    .shell {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ──────────────────────────────────────────────── */
+    /*  SIDEBAR                                         */
+    /* ──────────────────────────────────────────────── */
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 300px;
+      background: rgba(30, 30, 30, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-right: 1px solid var(--border-color, rgba(229,233,240,0.1));
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      gap: 2rem;
+      transform: translateX(0);
+      transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
+      overflow-y: auto;
+    }
+
+    /* Sidebar logo / brand */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+    .sidebar-brand .logo-mark {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary-accent, #81A1C1) 0%, #5E81AC 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; color: #fff;
+      box-shadow: 0 0 16px rgba(129,161,193,0.4);
+    }
+    .sidebar-brand span {
+      font-size: 1.1rem; font-weight: 600;
+      letter-spacing: 0.06em;
+      background: linear-gradient(90deg, var(--primary-text, #E5E9F0), var(--primary-accent, #81A1C1));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    /* Divider */
+    .sidebar-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    }
+
+    /* Sidebar nav links */
+    .sidebar-nav { display: flex; flex-direction: column; gap: 0.4rem; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.875rem; font-weight: 500;
+      color: var(--primary-text, #E5E9F0);
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s, border-left 0.2s;
+      border-left: 3px solid transparent;
+    }
+    .sidebar-nav a:hover {
+      background: rgba(129, 161, 193, 0.1);
+      color: var(--primary-accent, #81A1C1);
+    }
+    .sidebar-nav a.active {
+      background: rgba(129, 161, 193, 0.1);
+      color: var(--primary-accent, #81A1C1);
+      border-left: 3px solid var(--primary-accent, #81A1C1);
+      border-radius: 0 10px 10px 0;
+    }
+    .sidebar-nav a .nav-icon { font-size: 1rem; width: 20px; text-align: center; color: var(--primary-accent, #81A1C1); }
+
+    /* ──────────────────────────────────────────────── */
+    /*  MAIN CONTENT                                    */
+    /* ──────────────────────────────────────────────── */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 2.5rem 3rem;
+      margin-left: 300px;
+    }
+
+    .page-title {
+      font-size: 1.65rem; font-weight: 700;
+      background: linear-gradient(90deg, var(--primary-text, #E5E9F0) 30%, var(--muted-text, #707880) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ── Glassmorphism Cards ───────────────────────── */
+    .impact-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    .impact-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .impact-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--muted-text);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .impact-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+    }
+    .val-focus { color: var(--primary-accent); }
+    .val-streak { color: var(--secondary-accent); }
+    .val-sessions { color: var(--primary-text); }
+
+    /* ── Session Log ───────────────────────────────── */
+    .log-container {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+    .log-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted-text);
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 1rem;
+    }
+    .log-row {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid rgba(229, 233, 240, 0.1);
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 1rem;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .log-row:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .log-row:last-child {
+      border-bottom: none;
+    }
+    .log-goal {
+      font-weight: 500;
+      color: var(--primary-text);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .success-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--secondary-accent);
+      box-shadow: 0 0 6px var(--secondary-accent);
+      flex-shrink: 0;
+    }
+    .log-duration {
+      color: var(--primary-accent);
+      font-weight: 500;
+    }
+    .log-date {
+      color: var(--muted-text);
+      font-size: 0.85rem;
+    }
+    .empty-state {
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+    .empty-state p {
+      color: var(--muted-text);
+      margin-bottom: 1.5rem;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary-accent, #81A1C1), #5E81AC);
+      color: #fff;
+      font-size: 0.85rem; font-weight: 600;
+      text-decoration: none;
+      border: none; cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.25s;
+      box-shadow: 0 4px 20px rgba(129,161,193,0.35);
+    }
+    .btn-primary:hover {
+      opacity: 0.92; transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(129,161,193,0.5);
+    }
+
+    /* ── Fade-up animation ─────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.55s cubic-bezier(0.4,0,0.2,1) both; }
+    .delay-1 { animation-delay: 0.06s; }
+    .delay-2 { animation-delay: 0.12s; }
+    .delay-3 { animation-delay: 0.18s; }
+    .delay-4 { animation-delay: 0.26s; }
+
+    /* ── Mobile Responsive Sidebar ─────────────────── */
+    .hamburger-menu {
+      display: none;
+      position: fixed;
+      top: 1.5rem; left: 1.5rem; z-index: 100;
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: rgba(30,30,30,0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 4px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .hamburger-menu:hover {
+      background: rgba(129,161,193,0.2);
+      border-color: rgba(129,161,193,0.4);
+    }
+    .hamburger-menu span {
+      width: 20px; height: 2px;
+      background: var(--primary-accent);
+      border-radius: 2px;
+      transition: 0.3s;
+    }
+    body.sidebar-open .hamburger-menu span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    body.sidebar-open .hamburger-menu span:nth-child(2) { opacity: 0; }
+    body.sidebar-open .hamburger-menu span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    #sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(2px);
+      z-index: 40;
+    }
+    body.sidebar-open #sidebar-overlay { display: block; }
+
+    @media (max-width: 768px) {
+      #sidebar { transform: translateX(-100%); }
+      body.sidebar-open #sidebar { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 1.5rem; padding-top: 5rem; }
+      .hamburger-menu { display: flex; }
+    }
+
+    /* ── Button Haptic Feedback ────────────────────── */
+    .btn-press-effect:active { transform: scale(0.96) !important; }
+
+    /* ── Loading Shimmer ───────────────────────────── */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .loading-shimmer {
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite linear;
+    }
+
+    /* ── Hover Refinement ──────────────────────────── */
+    .impact-card {
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .impact-card:hover {
+      border: 1px solid rgba(129, 161, 193, 0.4);
+      box-shadow: 0 0 12px rgba(129, 161, 193, 0.1);
+    }
+    
+    /* ── Navigation Indicator ──────────────────────── */
+    .sidebar-nav a.active .nav-icon {
+      text-shadow: 0 0 10px rgba(129, 161, 193, 0.6);
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="spotlight" aria-hidden="true"></div>
+
+  <!-- Ambient glows -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+
+  <!-- Mobile Overlay & Toggle -->
+  <div id="sidebar-overlay"></div>
+  <button class="hamburger-menu btn-press-effect" id="mobile-menu-btn" aria-label="Toggle menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <div class="shell">
+    <!-- ════════════════════════════════════════════════
+         SIDEBAR
+    ═════════════════════════════════════════════════ -->
+    <aside id="sidebar" aria-label="Dashboard sidebar">
+      <div class="sidebar-brand">
+        <div class="logo-mark">F</div>
+        <span>FLOW</span>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav" aria-label="Primary navigation">
+        <a href="{% url 'home' %}">
+          <span class="nav-icon">⌂</span> Dashboard
+        </a>
+        <a href="{% url 'session_hub' %}">
+          <span class="nav-icon">◎</span> Session Hub
+        </a>
+        <a href="{% url 'session_history' %}" class="active">
+          <span class="nav-icon">📊</span> History
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ════════════════════════════════════════════════
+         MAIN CONTENT
+    ═════════════════════════════════════════════════ -->
+    <main class="main-content">
+      <h1 class="page-title fade-up">History & Insights</h1>
+
+      <!-- Analytics Header -->
+      <div class="impact-row">
+        <div class="impact-card fade-up delay-1">
+          <span class="impact-label">Total Focus</span>
+          <span class="impact-value val-focus">{{ total_focus_hours }}h</span>
+        </div>
+        <div class="impact-card fade-up delay-2">
+          <span class="impact-label">Daily Streak</span>
+          {% if current_streak > 0 %}
+          <span class="impact-value val-streak">{{ current_streak }}</span>
+          {% else %}
+          <span class="impact-value" style="color: var(--primary-text);">{{ current_streak }}</span>
+          {% endif %}
+        </div>
+        <div class="impact-card fade-up delay-3">
+          <span class="impact-label">Sessions</span>
+          <span class="impact-value val-sessions">{{ total_sessions }}</span>
+        </div>
+      </div>
+
+      <!-- Session Log -->
+      <div class="log-container fade-up delay-4">
+        {% if sessions %}
+          <div class="log-header">
+            <div>Goal</div>
+            <div>Duration</div>
+            <div>Date</div>
+          </div>
+          {% for session in sessions %}
+          <div class="log-row">
+            <div class="log-goal">
+              {% if session.status == 'completed' %}
+              <div class="success-dot" title="Completed Successfully"></div>
+              {% endif %}
+              <span>{{ user.profile.dream_goal|default:"Focus Session" }}</span>
+            </div>
+            <div class="log-duration">
+              {% if session.duration %}
+                {% widthratio session.duration 60 1 %} min
+              {% else %}
+                -
+              {% endif %}
+            </div>
+            <div class="log-date">{{ session.start_time|date:"M d, Y" }}</div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-state">
+            <svg style="width: 80px; height: 80px; margin: 0 auto 1rem; color: var(--primary-accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <h3 style="font-size: 1.4rem; color: var(--primary-text); margin-bottom: 0.5rem; font-weight: 700;">Your journey begins today.</h3>
+            <p style="color: var(--muted-text); margin-bottom: 2rem;">Every great achievement starts with a single session of focus.</p>
+            <a href="{% url 'session_hub' %}" class="btn-primary btn-press-effect">Go to Session Hub</a>
+          </div>
+        {% endif %}
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Spotlight cursor effect
+    document.addEventListener('mousemove', (e) => {
+      const spotlight = document.querySelector('.spotlight');
+      if (spotlight) {
+        spotlight.style.setProperty('--mx', `${e.clientX}px`);
+        spotlight.style.setProperty('--my', `${e.clientY}px`);
+      }
+    });
+
+    // Mobile Sidebar Toggle
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (menuBtn && overlay) {
+      menuBtn.addEventListener('click', () => {
+        document.body.classList.toggle('sidebar-open');
+      });
+      overlay.addEventListener('click', () => {
+        document.body.classList.remove('sidebar-open');
+      });
+    }
+  </script>
+</body>
+</html>

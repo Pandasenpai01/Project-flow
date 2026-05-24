@@ -1,0 +1,172 @@
+/* ============================================================
+   Project-Flow — Unified Layout Foundation (CSS Grid)
+   Goal: Static center column that never shifts.
+   Applies at the <body> level so pages inherit by default.
+   ============================================================ */
+
+@import url('theme.css');
+
+/* -------- Root grid (default: desktop) -------- */
+html, body{
+  height: 100%;
+}
+
+body{
+  margin: 0;
+  min-height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+
+  display: grid;
+  grid-template-columns: var(--sidebar-width-left) minmax(0, 1fr) var(--sidebar-width-right);
+  grid-template-areas: "left center right";
+  align-items: stretch;
+
+  background: var(--color-bg-deep);
+}
+
+/* Left / right sidebars: will slot into grid if present */
+body #left-sidebar{
+  grid-area: left;
+  height: 100vh;
+  overflow-y: auto;
+  transition: transform var(--transition-normal) var(--ease-smooth);
+  will-change: transform;
+}
+
+body #right-sidebar{
+  grid-area: right;
+  height: 100vh;
+  overflow-y: auto;
+  transition: transform var(--transition-normal) var(--ease-smooth);
+  will-change: transform;
+}
+
+/* Center column container: supports either id used across pages */
+body #center-column,
+body #content-wrapper,
+body #main-content{
+  grid-area: center;
+  height: 100vh;
+  overflow-y: auto;
+  min-width: 0;
+
+  /* inner centering */
+  padding: 30px;
+}
+
+/* Inner max-width centering (applied to children so center stays pinned) */
+body #center-column > *,
+body #content-wrapper > *,
+body #main-content > *{
+  max-width: var(--content-max-width);
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Optional helper wrapper you can use inside center */
+.content-center-wrapper{
+  max-width: var(--content-max-width);
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* -------- Sidebar collapse (body classes, transform-only) --------
+   Supports multiple existing class names so we don’t require JS rewrites.
+*/
+
+/* Left collapsed */
+body.sidebar-collapsed #left-sidebar,
+body.left-sidebar-hidden #left-sidebar{
+  transform: translateX(calc(-1 * var(--sidebar-width-left)));
+  pointer-events: none;
+}
+
+/* Right collapsed */
+body.right-sidebar-collapsed #right-sidebar,
+body.right-sidebar-hidden #right-sidebar{
+  transform: translateX(var(--sidebar-width-right));
+  pointer-events: none;
+}
+
+/* Smooth center resizing (no shifting; just responsive padding/width) */
+body #center-column,
+body #content-wrapper,
+body #main-content{
+  transition: padding var(--transition-normal) var(--ease-smooth);
+}
+
+/* ============================================================
+   Layout mode hooks (optional explicit classes)
+   These are mirrored by media queries below.
+   ============================================================ */
+
+body.layout-desktop{
+  grid-template-columns: var(--sidebar-width-left) minmax(0, 1fr) var(--sidebar-width-right);
+}
+
+body.layout-tablet{
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "center";
+}
+
+body.layout-mobile{
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "center";
+}
+
+/* ============================================================
+   Media queries — automatically apply the equivalent of:
+   .layout-desktop / .layout-tablet / .layout-mobile
+   ============================================================ */
+
+/* Tablet (860px–1200px): center column only; sidebars overlay (fixed) */
+@media (max-width: 1200px){
+  body{
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "center";
+  }
+
+  /* Sidebars overlay content */
+  body #left-sidebar,
+  body #right-sidebar{
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    z-index: var(--z-sidebar);
+    background: var(--color-bg-deep);
+  }
+
+  body #left-sidebar{
+    left: 0;
+    width: min(86vw, calc(var(--sidebar-width-left) + 40px));
+    transform: translateX(-100%);
+  }
+
+  body #right-sidebar{
+    right: 0;
+    width: min(86vw, calc(var(--sidebar-width-right) + 60px));
+    transform: translateX(100%);
+  }
+
+  /* When NOT collapsed, slide in (supports both naming conventions) */
+  body:not(.sidebar-collapsed):not(.left-sidebar-hidden) #left-sidebar{
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+  body:not(.right-sidebar-collapsed):not(.right-sidebar-hidden) #right-sidebar{
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+}
+
+/* Mobile (<860px): tighter padding; sidebars remain overlays */
+@media (max-width: 860px){
+  body #center-column,
+  body #content-wrapper,
+  body #main-content{
+    padding: 22px 16px;
+  }
+}
+

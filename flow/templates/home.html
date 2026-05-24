@@ -87,6 +87,27 @@
     }
     #sidebar.open { transform: translateX(0); }
 
+    #right-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: 300px;
+      background: rgba(24, 24, 27, 0.72);   /* zinc-900 + alpha */
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border-left: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      gap: 2rem;
+      transform: translateX(100%);
+      transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 50;
+      overflow-y: auto;
+    }
+    #right-sidebar.open { transform: translateX(0); }
+
     /* Sidebar logo / brand */
     .sidebar-brand {
       display: flex;
@@ -218,12 +239,11 @@
     .sidebar-nav a .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
 
     /* ──────────────────────────────────────────────── */
-    /*  SIDEBAR TOGGLE BUTTON                           */
+    /*  SIDEBAR TOGGLE BUTTONS                          */
     /* ──────────────────────────────────────────────── */
-    #sidebar-toggle {
+    #sidebar-toggle, #right-sidebar-toggle {
       position: fixed;
       top: 1.5rem;
-      left: 1.5rem;
       z-index: 100;
       width: 40px; height: 40px;
       border-radius: 12px;
@@ -235,12 +255,15 @@
       transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
       box-shadow: 0 4px 24px rgba(0,0,0,0.4);
     }
-    #sidebar-toggle:hover {
+    #sidebar-toggle { left: 1.5rem; }
+    #right-sidebar-toggle { right: 1.5rem; }
+
+    #sidebar-toggle:hover, #right-sidebar-toggle:hover {
       background: rgba(99,102,241,0.2);
       border-color: rgba(99,102,241,0.4);
       box-shadow: 0 0 0 3px rgba(99,102,241,0.15), 0 4px 24px rgba(0,0,0,0.4);
     }
-    #sidebar-toggle svg {
+    #sidebar-toggle svg, #right-sidebar-toggle svg {
       width: 18px; height: 18px;
       stroke: #a5b4fc;
       fill: none;
@@ -250,6 +273,7 @@
       transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
     }
     #sidebar-toggle.active svg { transform: rotate(180deg); }
+    #right-sidebar-toggle.active svg { transform: rotate(-180deg); }
 
     /* Sidebar overlay (mobile) */
     #sidebar-overlay {
@@ -268,32 +292,211 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 2.5rem 3rem;
-      transition: margin-left 0.38s cubic-bezier(0.4,0,0.2,1);
-    }
-    .main-content.shifted { margin-left: 300px; }
-
-    /* ── Top bar ───────────────────────────────────── */
-    .topbar {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
+      padding: 4.5rem 3rem 2.5rem 3rem;
       align-items: center;
-      margin-bottom: 3rem;
-      padding-left: 3.5rem; /* clear the toggle button */
     }
-    .topbar-greeting {
-      display: flex; flex-direction: column; gap: 0.2rem;
+
+    /* ── Central Dashboard Area ── */
+    .dashboard-center {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
     }
-    .topbar-greeting .eyebrow {
-      font-size: 0.7rem; font-weight: 600;
-      letter-spacing: 0.2em; text-transform: uppercase;
-      color: rgba(161,161,170,0.6);
-    }
-    .topbar-greeting h1 {
-      font-size: 1.65rem; font-weight: 700;
-      background: linear-gradient(90deg, #f4f4f5 30%, #a1a1aa 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    
+    .welcome-heading {
+      font-size: 2.4rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #f4f4f5;
+      text-align: center;
       margin: 0;
+      text-shadow: 0 0 15px rgba(255,255,255,0.1);
+    }
+
+    /* Progress Card */
+    .progress-card {
+      width: 100%;
+      background: rgba(24, 24, 27, 0.7);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 1.8rem 2.2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      backdrop-filter: blur(12px);
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 1.25rem;
+    }
+    .progress-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #e4e4e7;
+      margin: 0;
+    }
+    .progress-stats {
+      font-size: 0.8rem;
+      color: #a1a1aa;
+      font-weight: 500;
+    }
+    .progress-track {
+      width: 100%;
+      height: 28px;
+      background: rgba(0,0,0,0.4);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .progress-fill {
+      height: 100%;
+      width: 67%;
+      background: linear-gradient(90deg, #10b981, #34d399);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #064e3b;
+      box-shadow: 0 0 15px rgba(52, 211, 153, 0.3);
+    }
+
+    /* Goals Card */
+    .goals-card {
+      width: 100%;
+      background: rgba(24, 24, 27, 0.7);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 24px;
+      padding: 2rem 2.2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      backdrop-filter: blur(12px);
+    }
+    .goals-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.8rem;
+    }
+    .goals-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #e4e4e7;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+    }
+    .btn-add-goal {
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 0.6rem 1.25rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    }
+    .btn-add-goal:hover {
+      background: #4f46e5;
+      transform: translateY(-1px);
+    }
+    
+    .todo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .todo-item {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 1.25rem 1.5rem;
+      background: rgba(39, 39, 42, 0.4);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 16px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .todo-item:hover {
+      background: rgba(39, 39, 42, 0.7);
+    }
+    .todo-item.completed {
+      border-color: rgba(16, 185, 129, 0.2);
+      background: rgba(16, 185, 129, 0.08);
+    }
+    .todo-checkbox {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid #52525b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .todo-item.completed .todo-checkbox {
+      background: #10b981;
+      border-color: #10b981;
+    }
+    .todo-checkbox svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .todo-item.completed .todo-checkbox svg {
+      opacity: 1;
+    }
+    .todo-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .todo-text {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #e4e4e7;
+    }
+    .todo-item.completed .todo-text {
+      color: #a1a1aa;
+    }
+    .todo-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .todo-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.15);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .todo-item.completed .todo-badge {
+      color: #6ee7b7;
+      background: rgba(16, 185, 129, 0.15);
+    }
+    .todo-time {
+      font-size: 0.75rem;
+      color: #71717a;
     }
     
     .goal-pill {
@@ -735,7 +938,14 @@
       <span>FLOW</span>
     </div>
 
-    <div class="sidebar-divider"></div>
+    <div class="sidebar-divider" style="margin-bottom: 1.5rem;"></div>
+
+    {% if dream_goal %}
+    <div class="goal-pill" style="margin-bottom: 1.5rem; width: 100%; justify-content: center; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3);">
+      <span class="goal-pill-text">Targeting: <strong>{{ dream_goal }}</strong></span>
+      <button id="btn-edit-goal" title="Edit Goal">✎</button>
+    </div>
+    {% endif %}
 
     <!-- Navigation -->
     <nav class="sidebar-nav" aria-label="Primary navigation">
@@ -748,6 +958,31 @@
     </nav>
 
     <div class="sidebar-divider"></div>
+
+    <div style="flex:1;"></div>
+
+    <!-- User info -->
+    <div class="sidebar-divider"></div>
+    <div style="display:flex; align-items:center; gap:0.65rem; padding:0.25rem 0;">
+      <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6);
+                  display:flex; align-items:center; justify-content:center;
+                  font-size:0.8rem; font-weight:700; color:#fff; flex-shrink:0;">
+        {{ request.user.username|slice:":1"|upper }}
+      </div>
+      <div style="flex:1; min-width:0;">
+        <p style="font-size:0.82rem; font-weight:600; color:#d4d4d8; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+          {{ request.user.username }}
+        </p>
+        <p style="font-size:0.7rem; color:#52525b; margin:0;">Free plan</p>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ════════════════════════════════════════════════
+       RIGHT SIDEBAR
+  ═════════════════════════════════════════════════ -->
+  <aside id="right-sidebar" aria-label="Dashboard right sidebar">
 
     <!-- ── Motivation section ── -->
     <div>
@@ -787,22 +1022,6 @@
       </div>
     </div>
 
-    <!-- User info -->
-    <div class="sidebar-divider"></div>
-    <div style="display:flex; align-items:center; gap:0.65rem; padding:0.25rem 0;">
-      <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6);
-                  display:flex; align-items:center; justify-content:center;
-                  font-size:0.8rem; font-weight:700; color:#fff; flex-shrink:0;">
-        {{ request.user.username|slice:":1"|upper }}
-      </div>
-      <div style="flex:1; min-width:0;">
-        <p style="font-size:0.82rem; font-weight:600; color:#d4d4d8; margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-          {{ request.user.username }}
-        </p>
-        <p style="font-size:0.7rem; color:#52525b; margin:0;">Free plan</p>
-      </div>
-    </div>
-
   </aside>
 
   <!-- ════════════════════════════════════════════════
@@ -817,38 +1036,93 @@
         <polyline points="9 18 15 12 9 6"></polyline>
       </svg>
     </button>
+    
+    <button id="right-sidebar-toggle" aria-label="Toggle right sidebar" aria-expanded="false" aria-controls="right-sidebar">
+      <!-- Chevron left icon — rotates to chevron right when open -->
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
 
     <!-- ── Main content ───────────────────────────── -->
     <main class="main-content" id="main-content">
-
-      <!-- Top bar -->
-      <header class="topbar fade-up">
-        <div class="topbar-greeting" style="justify-self: start;">
-          <span class="eyebrow">Good to see you back</span>
-          <h1>Hey, {{ request.user.first_name|default:request.user.username }} 👋</h1>
-        </div>
+      <div class="dashboard-center">
+        <h1 class="welcome-heading fade-up">WELCOME {{ request.user.first_name|default:request.user.username|upper }}</h1>
         
-        <div class="topbar-middle" style="justify-self: center;">
-          {% if dream_goal %}
-          <div class="goal-pill">
-            <span class="goal-pill-text">Targeting: <strong>{{ dream_goal }}</strong></span>
-            <button id="btn-edit-goal" title="Edit Goal">✎</button>
+        <div class="progress-card fade-up delay-1">
+          <div class="progress-header">
+            <h2 class="progress-title">Today's Progress</h2>
+            <span class="progress-stats">4 of 6 goals completed</span>
           </div>
-          {% endif %}
+          <div class="progress-track">
+            <div class="progress-fill">67%</div>
+          </div>
         </div>
 
-        <div class="topbar-actions">
-        </div>
-      </header>
+        <div class="goals-card fade-up delay-2">
+          <div class="goals-header">
+            <h2 class="goals-title">Today's Goals</h2>
+            <button class="btn-add-goal">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Add Goals
+            </button>
+          </div>
+          <div class="todo-list">
+            <!-- Placeholder Items -->
+            <div class="todo-item">
+              <div class="todo-checkbox">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <div class="todo-content">
+                <span class="todo-text">Complete Physics Assignment</span>
+                <div class="todo-meta">
+                  <span class="todo-badge">DEEP WORK</span>
+                  <span class="todo-time">• 2 Hr 30 Mins</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="todo-item completed">
+              <div class="todo-checkbox">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <div class="todo-content">
+                <span class="todo-text">Complete Physics Assignment</span>
+                <div class="todo-meta">
+                  <span class="todo-badge">DEEP WORK</span>
+                  <span class="todo-time">• 2 Hr 30 Mins</span>
+                </div>
+              </div>
+            </div>
 
-      <!-- ── Quick actions ───────────── -->
-      <div class="fade-up delay-1">
-        <p class="section-title">Quick Actions</p>
-        <div class="quick-actions">
-          <a href="{% url 'session_hub' %}" class="btn-primary" id="qa-focus">▶ Start Focus</a>
+            <div class="todo-item">
+              <div class="todo-checkbox">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <div class="todo-content">
+                <span class="todo-text">Complete Physics Assignment</span>
+                <div class="todo-meta">
+                  <span class="todo-badge">DEEP WORK</span>
+                  <span class="todo-time">• 2 Hr 30 Mins</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="todo-item completed">
+              <div class="todo-checkbox">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+              <div class="todo-content">
+                <span class="todo-text">Complete Physics Assignment</span>
+                <div class="todo-meta">
+                  <span class="todo-badge">DEEP WORK</span>
+                  <span class="todo-time">• 2 Hr 30 Mins</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
     </main>
   </div><!-- /.shell -->
 
@@ -869,9 +1143,17 @@
     ════════════════════════════════════════════════════ */
     const sidebar        = document.getElementById('sidebar');
     const sidebarToggle  = document.getElementById('sidebar-toggle');
+    const rightSidebar   = document.getElementById('right-sidebar');
+    const rightSidebarToggle = document.getElementById('right-sidebar-toggle');
     const sidebarOverlay = document.getElementById('sidebar-overlay');
     const mainContent    = document.getElementById('main-content');
     const qaToggle       = document.getElementById('qa-toggle-sidebar');
+
+    function checkOverlay() {
+      if (!sidebar.classList.contains('open') && !rightSidebar.classList.contains('open')) {
+        sidebarOverlay.classList.remove('visible');
+      }
+    }
 
     function openSidebar() {
       sidebar.classList.add('open');
@@ -883,22 +1165,48 @@
     function closeSidebar() {
       sidebar.classList.remove('open');
       sidebarToggle.classList.remove('active');
-      sidebarOverlay.classList.remove('visible');
       sidebarToggle.setAttribute('aria-expanded', 'false');
       mainContent.classList.remove('shifted');
+      checkOverlay();
     }
     function toggleSidebar() {
       sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
     }
 
+    function openRightSidebar() {
+      rightSidebar.classList.add('open');
+      rightSidebarToggle.classList.add('active');
+      sidebarOverlay.classList.add('visible');
+      rightSidebarToggle.setAttribute('aria-expanded', 'true');
+      if (window.innerWidth >= 900) mainContent.classList.add('shifted-right');
+    }
+    function closeRightSidebar() {
+      rightSidebar.classList.remove('open');
+      rightSidebarToggle.classList.remove('active');
+      rightSidebarToggle.setAttribute('aria-expanded', 'false');
+      mainContent.classList.remove('shifted-right');
+      checkOverlay();
+    }
+    function toggleRightSidebar() {
+      rightSidebar.classList.contains('open') ? closeRightSidebar() : openRightSidebar();
+    }
+
     sidebarToggle.addEventListener('click', toggleSidebar);
-    sidebarOverlay.addEventListener('click', closeSidebar);
+    rightSidebarToggle.addEventListener('click', toggleRightSidebar);
+    sidebarOverlay.addEventListener('click', () => {
+      closeSidebar();
+      closeRightSidebar();
+    });
     if (qaToggle) qaToggle.addEventListener('click', toggleSidebar);
     mainContent.addEventListener('click', () => {
       if (sidebar.classList.contains('open')) closeSidebar();
+      if (rightSidebar.classList.contains('open')) closeRightSidebar();
     });
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && sidebar.classList.contains('open')) closeSidebar();
+      if (e.key === 'Escape') {
+        if (sidebar.classList.contains('open')) closeSidebar();
+        if (rightSidebar.classList.contains('open')) closeRightSidebar();
+      }
     });
 
 
@@ -1056,6 +1364,7 @@
     ════════════════════════════════════════════════════ */
     window.addEventListener('load', () => {
       openSidebar();
+      openRightSidebar();
     });
 
     // Spotlight Cursor Follower

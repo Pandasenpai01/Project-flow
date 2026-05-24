@@ -1,0 +1,111 @@
+@import url('theme.css');
+
+/* ============================================================
+   PHASE 6 · Toast Notifications & UX Enhancements
+   ============================================================ */
+
+/* ── Toast Notification System ───────────────────── */
+#toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-accent-light);
+  color: var(--color-text-secondary);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(129, 161, 193, 0.3),
+    0 0 20px rgba(129, 161, 193, 0.1) inset;
+  animation: toastSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: all;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  max-width: 400px;
+}
+
+.toast.success {
+  border-color: var(--color-success);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(163, 190, 140, 0.3),
+    0 0 20px rgba(163, 190, 140, 0.1) inset;
+}
+
+.toast.error {
+  border-color: var(--color-error);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(191, 97, 106, 0.3),
+    0 0 20px rgba(191, 97, 106, 0.1) inset;
+}
+
+.toast.info {
+  border-color: var(--color-info);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(94, 129, 172, 0.3),
+    0 0 20px rgba(94, 129, 172, 0.1) inset;
+}
+
+.toast-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.toast-message {
+  flex: 1;
+  line-height: 1.4;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) translateY(20px);
+  }
+}
+
+/* ── Responsive Toast ───────────────────────────── */
+@media (max-width: 480px) {
+  #toast-container {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+  
+  .toast {
+    max-width: none;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.85rem;
+  }
+}
