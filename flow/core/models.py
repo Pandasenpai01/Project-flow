@@ -163,3 +163,36 @@ class UserProfile(models.Model):
 
     def __str__(self) -> str:
         return f"Profile({self.user_id})"
+
+
+class TodoItem(models.Model):
+    """A single to-do task belonging to a user."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="todos",
+        help_text="The user this task belongs to.",
+    )
+    text = models.CharField(
+        max_length=255,
+        help_text="The text of the to-do item.",
+    )
+    is_completed = models.BooleanField(
+        default=False,
+        help_text="Whether the task is checked off.",
+    )
+    order = models.IntegerField(
+        default=0,
+        help_text="Used for drag-and-drop sorting.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["order", "-created_at"]
+        verbose_name = "todo item"
+        verbose_name_plural = "todo items"
+
+    def __str__(self) -> str:
+        return self.text[:50]
