@@ -13,7 +13,7 @@ from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
-from .models import DailyStatistic, Session, UserProfile
+from .models import DailyStatistic, Session, TodoItem, UserProfile
 
 
 import random
@@ -692,4 +692,135 @@ def export_sessions_pdf(request):
     p.showPage()
     p.save()
     return response
+
+
+# ---------------------------------------------------------------------------
+# Todo API views
+# ---------------------------------------------------------------------------
+
+@require_http_methods(["GET"])
+def get_todos(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+
+    todos = TodoItem.objects.filter(user=request.user).order_by("order", "-created_at")
+    data = [
+        {
+            "id": t.id,
+            "text": t.text,
+            "is_completed": t.is_completed,
+            "order": t.order,
+            "created_at": t.created_at.isoformat(),
+        }
+        for t in todos
+    ]
+    return JsonResponse({"data": data})
+
+
+@require_http_methods(["POST"])
+def create_todo(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+
+    body = _get_json_body(request)
+    if body is None:
+        return JsonResponse({"error": "invalid_json"}, status=400)
+
+    text = (body.get("text") or "").strip() if isinstance(body, dict) else ""
+    if not text:
+        return JsonResponse({"error": "text_required"}, status=400)
+    if len(text) > 255:
+        return JsonResponse({"error": "text_too_long"}, status=400)
+
+    order = TodoItem.objects.filter(user=request.user).count()
+    todo = TodoItem.objects.create(user=request.user, text=text, order=order)
+
+    return JsonResponse(
+        {
+            "id": todo.id,
+            "text": todo.text,
+            "is_completed": todo.is_completed,
+            "order": todo.order,
+            "created_at": todo.created_at.isoformat(),
+        },
+        status=201,
+    )
+
+
+@require_http_methods(["PATCH"])
+def update_todo(request, todo_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+
+    try:
+        todo = TodoItem.objects.get(pk=todo_id, user=request.user)
+    except TodoItem.DoesNotExist:
+        return JsonResponse({"error": "not_found"}, status=404)
+
+    body = _get_json_body(request)
+    if body is None:
+        return JsonResponse({"error": "invalid_json"}, status=400)
+
+    update_fields = []
+    if isinstance(body, dict):
+        if "text" in body:
+            todo.text = (body["text"] or "").strip()[:255]
+            update_fields.append("text")
+        if "is_completed" in body:
+            todo.is_completed = bool(body["is_completed"])
+            update_fields.append("is_completed")
+        if "order" in body:
+            todo.order = int(body["order"])
+            update_fields.append("order")
+
+    if update_fields:
+        update_fields.append("updated_at")
+        todo.save(update_fields=update_fields)
+
+    return JsonResponse(
+        {
+            "id": todo.id,
+            "text": todo.text,
+            "is_completed": todo.is_completed,
+            "order": todo.order,
+            "created_at": todo.created_at.isoformat(),
+        }
+    )
+
+
+@require_http_methods(["DELETE"])
+def delete_todo(request, todo_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+
+    try:
+        todo = TodoItem.objects.get(pk=todo_id, user=request.user)
+    except TodoItem.DoesNotExist:
+        return JsonResponse({"error": "not_found"}, status=404)
+
+    todo.delete()
+    return JsonResponse({"status": "deleted"})
+
+
+@require_http_methods(["PUT"])
+def reorder_todos(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "authentication_required"}, status=401)
+
+    body = _get_json_body(request)
+    if body is None:
+        return JsonResponse({"error": "invalid_json"}, status=400)
+
+    items = body.get("items", []) if isinstance(body, dict) else []
+    user_todo_ids = set(
+        TodoItem.objects.filter(user=request.user).values_list("id", flat=True)
+    )
+
+    for item in items:
+        todo_id = item.get("id")
+        order = item.get("order")
+        if todo_id in user_todo_ids and order is not None:
+            TodoItem.objects.filter(pk=todo_id).update(order=order)
+
+    return JsonResponse({"status": "reordered"})
 

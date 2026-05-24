@@ -60,8 +60,8 @@
       if (form) form.reset();
     }
   
-    async function submitNewTodo(title, description, priority) {
-      const body = { title, description, priority };
+    async function submitNewTodo(title) {
+      const body = { text: title };
       const { resp, payload } = await apiFetch("/api/todos/create/", {
         method: "POST",
         body: JSON.stringify(body),
@@ -69,7 +69,7 @@
       if (!resp.ok) {
         throw new Error(payload?.message || payload?.error || "create_failed");
       }
-      return payload?.todo;
+      return payload;
     }
   
     /* ══════════════════════════════════════════════════
@@ -98,8 +98,7 @@
                aria-checked="${todo.is_completed}"
                tabindex="0">
           </div>
-          <div class="todo-priority-dot ${todo.priority}"></div>
-          <div class="todo-title ${todo.is_completed ? 'completed' : ''}">${escapeHtml(todo.title)}</div>
+          <div class="todo-title ${todo.is_completed ? 'completed' : ''}">${escapeHtml(todo.text || '')}</div>
           <span class="todo-status ${todo.is_completed ? 'completed' : ''}">${todo.is_completed ? 'done' : 'pending'}</span>
           <button class="todo-delete" data-todo-id="${todo.id}" type="button" aria-label="Delete todo">🗑️</button>
         </div>
@@ -145,8 +144,9 @@
       renderTodoList(todayTodos);
   
       try {
-        const { resp, payload } = await apiFetch(`/api/todos/${todoId}/toggle/`, {
+        const { resp, payload } = await apiFetch(`/api/todos/${todoId}/update/`, {
           method: "PATCH",
+          body: JSON.stringify({ is_completed: !oldState }),
         });
   
         if (!resp.ok) {
@@ -160,8 +160,7 @@
         }
   
         // Update from server response
-        todo.is_completed = payload.todo?.is_completed ?? todo.is_completed;
-        todo.completed_at = payload.todo?.completed_at ?? null;
+        todo.is_completed = payload?.is_completed ?? todo.is_completed;
         renderTodoList(todayTodos);
   
         if (typeof showToast !== 'undefined') {
@@ -213,26 +212,19 @@
        TODO STATS - Progress Bar
     ═════════════════════════════════════════════════════ */
   
-    async function updateTodoStats() {
-      try {
-        const { resp, payload } = await apiFetch("/api/todos/stats/");
-        if (!resp.ok) return;
+    function updateTodoStats() {
+      const total = todayTodos.length;
+      const completed = todayTodos.filter(t => t.is_completed).length;
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
   
-        const total = payload.total_todos || 0;
-        const completed = payload.completed_todos || 0;
-        const percent = payload.completion_percent || 0;
+      const textEl = $("todo-progress-text");
+      if (textEl) textEl.textContent = `${completed} of ${total} completed`;
   
-        const textEl = $("todo-progress-text");
-        if (textEl) textEl.textContent = `${completed} of ${total} completed`;
+      const percentEl = $("todo-progress-percent");
+      if (percentEl) percentEl.textContent = `${percent}%`;
   
-        const percentEl = $("todo-progress-percent");
-        if (percentEl) percentEl.textContent = `${Math.round(percent)}%`;
-  
-        const fillEl = $("todo-progress-fill");
-        if (fillEl) fillEl.style.width = `${Math.min(percent, 100)}%`;
-      } catch (err) {
-        console.error("stats error:", err);
-      }
+      const fillEl = $("todo-progress-fill");
+      if (fillEl) fillEl.style.width = `${Math.min(percent, 100)}%`;
     }
   
     /* ══════════════════════════════════════════════════
@@ -241,10 +233,10 @@
   
     async function loadTodosForToday() {
       try {
-        const { resp, payload } = await apiFetch("/api/todos/today/");
+        const { resp, payload } = await apiFetch("/api/todos/");
         if (!resp.ok) return;
   
-        todayTodos = Array.isArray(payload.todos) ? payload.todos : [];
+        todayTodos = Array.isArray(payload.data) ? payload.data : [];
         renderTodoList(todayTodos);
       } catch (err) {
         console.error("load todos error:", err);
@@ -301,7 +293,7 @@
           }
   
           try {
-            const created = await submitNewTodo(title, description, priority);
+            const created = await submitNewTodo(title);
             if (created) {
               todayTodos = [created, ...todayTodos];
               renderTodoList(todayTodos);
