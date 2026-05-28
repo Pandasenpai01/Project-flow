@@ -186,6 +186,7 @@ class TodoItem(models.Model):
         default=0,
         help_text="Used for drag-and-drop sorting.",
     )
+    priority = models.CharField(max_length=50, blank=True, null=True, default="Not Urgent & Not Important")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

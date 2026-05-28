@@ -710,6 +710,7 @@ def get_todos(request):
             "text": t.text,
             "is_completed": t.is_completed,
             "order": t.order,
+            "priority": t.priority,
             "created_at": t.created_at.isoformat(),
         }
         for t in todos
@@ -733,7 +734,8 @@ def create_todo(request):
         return JsonResponse({"error": "text_too_long"}, status=400)
 
     order = TodoItem.objects.filter(user=request.user).count()
-    todo = TodoItem.objects.create(user=request.user, text=text, order=order)
+    priority = body.get("priority", "Not Urgent & Not Important") if isinstance(body, dict) else "Not Urgent & Not Important"
+    todo = TodoItem.objects.create(user=request.user, text=text, order=order, priority=priority)
 
     return JsonResponse(
         {
@@ -741,6 +743,7 @@ def create_todo(request):
             "text": todo.text,
             "is_completed": todo.is_completed,
             "order": todo.order,
+            "priority": todo.priority,
             "created_at": todo.created_at.isoformat(),
         },
         status=201,

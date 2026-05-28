@@ -1,4 +1,5 @@
 {% load tailwind_tags %}
+{% load static %}
 <!doctype html>
 <html lang="en" class="h-full">
 
@@ -860,7 +861,222 @@
       color: #fca5a5;
       font-size: 0.78rem;
     }
-  </style>
+  
+    /* ── Modal Styles ───────────────────────────── */
+    #todo-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #todo-modal-backdrop[hidden] {
+      display: none;
+    }
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .modal-content {
+      position: relative;
+      background: rgba(24, 24, 27, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #e4e4e7;
+    }
+    #todo-modal-close {
+      background: transparent;
+      border: none;
+      color: #a1a1aa;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    #todo-modal-close:hover {
+      color: #e4e4e7;
+    }
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    #todo-title {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      color: #e4e4e7;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    #todo-title:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    #todo-title::placeholder {
+      color: #71717a;
+    }
+    .priority-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .priority-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .priority-group > label:first-child {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .radio-label:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .radio-label input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #52525b;
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .radio-label input[type="radio"]:checked {
+      border-color: #6366f1;
+      background: #6366f1;
+    }
+    .radio-label input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+    }
+    .radio-label span {
+      color: #e4e4e7;
+      font-size: 0.95rem;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .modal-footer button[type="button"] {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: #a1a1aa;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-footer button[type="button"]:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #e4e4e7;
+    }
+    .modal-footer button[type="submit"] {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    .modal-footer button[type="submit"]:hover {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      transform: translateY(-1px);
+    }
+
+    .todo-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      flex: 1;
+    }
+    .todo-priority {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .todo-checkbox.is-checked {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: rgba(16, 185, 129, 0.5);
+    }
+    .todo-checkbox.is-checked svg {
+      stroke: #10b981;
+      stroke-width: 2.5;
+    }
+    .todo-delete {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      color: #fca5a5;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .todo-delete:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.5);
+      color: #f87171;
+    }
+</style>
 </head>
 
 <body>
@@ -1052,75 +1268,23 @@
         <div class="progress-card fade-up delay-1">
           <div class="progress-header">
             <h2 class="progress-title">Today's Progress</h2>
-            <span class="progress-stats">4 of 6 goals completed</span>
+            <span class="progress-stats" id="todo-progress-text">0 of 0 goals completed</span>
           </div>
           <div class="progress-track">
-            <div class="progress-fill">67%</div>
+            <div class="progress-fill" id="todo-progress-fill" style="width: 0%"><span id="todo-progress-percent">0%</span></div>
           </div>
         </div>
 
         <div class="goals-card fade-up delay-2">
           <div class="goals-header">
             <h2 class="goals-title">Today's Goals</h2>
-            <button class="btn-add-goal">
+            <button class="btn-add-goal" id="btn-add-todo">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               Add Goals
             </button>
           </div>
-          <div class="todo-list">
-            <!-- Placeholder Items -->
-            <div class="todo-item">
-              <div class="todo-checkbox">
-                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              </div>
-              <div class="todo-content">
-                <span class="todo-text">Complete Physics Assignment</span>
-                <div class="todo-meta">
-                  <span class="todo-badge">DEEP WORK</span>
-                  <span class="todo-time">• 2 Hr 30 Mins</span>
-                </div>
-              </div>
+          <div class="todo-list" id="todo-list">
             </div>
-            
-            <div class="todo-item completed">
-              <div class="todo-checkbox">
-                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              </div>
-              <div class="todo-content">
-                <span class="todo-text">Complete Physics Assignment</span>
-                <div class="todo-meta">
-                  <span class="todo-badge">DEEP WORK</span>
-                  <span class="todo-time">• 2 Hr 30 Mins</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="todo-item">
-              <div class="todo-checkbox">
-                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              </div>
-              <div class="todo-content">
-                <span class="todo-text">Complete Physics Assignment</span>
-                <div class="todo-meta">
-                  <span class="todo-badge">DEEP WORK</span>
-                  <span class="todo-time">• 2 Hr 30 Mins</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="todo-item completed">
-              <div class="todo-checkbox">
-                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              </div>
-              <div class="todo-content">
-                <span class="todo-text">Complete Physics Assignment</span>
-                <div class="todo-meta">
-                  <span class="todo-badge">DEEP WORK</span>
-                  <span class="todo-time">• 2 Hr 30 Mins</span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </main>
@@ -1398,5 +1562,52 @@
     })();
   </script>
 
+  <!-- Todo Modal -->
+  <div id="todo-modal-backdrop" hidden>
+    <div class="modal-overlay" onclick="hideAddTodoModal()"></div>
+    <div class="modal-content">
+      <form id="todo-form">
+        <div class="modal-header">
+          <h3>Add New Goal</h3>
+          <button type="button" id="todo-modal-close" onclick="hideAddTodoModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="todo-title" name="title" placeholder="Enter your goal..." required autocomplete="off">
+          
+          <div class="priority-section">
+            <div class="priority-group">
+              <label>Urgency:</label>
+              <label class="radio-label">
+                <input type="radio" name="urgency" value="Urgent" required>
+                <span>Urgent</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="urgency" value="Not Urgent" required>
+                <span>Not Urgent</span>
+              </label>
+            </div>
+            
+            <div class="priority-group">
+              <label>Importance:</label>
+              <label class="radio-label">
+                <input type="radio" name="importance" value="Important" required>
+                <span>Important</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="importance" value="Not Important" required>
+                <span>Not Important</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="todo-cancel" onclick="hideAddTodoModal()">Cancel</button>
+          <button type="submit">Add Goal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script src="{% static 'js/home_todos.js' %}"></script>
 </body>
 </html>
