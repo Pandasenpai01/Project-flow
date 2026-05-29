@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-u+xmg$qfe-k!jtkh4f0=g0+^f=#$^#4#k^^efr9&9bv&+m^l%=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,7 +84,24 @@ TAILWIND_APP_NAME = "theme"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-if config and config("DB_ENGINE", default="").lower() == "mysql":
+if config and config("DATABASE_URL", default=""):
+    # Production: PostgreSQL on Neon/cloud
+    import urllib.parse
+    url = config("DATABASE_URL")
+    result = urllib.parse.urlparse(url)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": result.path[1:],
+            "USER": result.username,
+            "PASSWORD": result.password,
+            "HOST": result.hostname,
+            "PORT": result.port or 5432,
+            "OPTIONS": {"sslmode": "require"},
+        }
+    }
+elif config and config("DB_ENGINE", default="").lower() == "mysql":
+    # Local: MySQL (unchanged for local devs who use MySQL)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
@@ -96,7 +114,7 @@ if config and config("DB_ENGINE", default="").lower() == "mysql":
         }
     }
 else:
-    # Fallback for first-time setup (so the project runs even before MySQL is ready)
+    # Fallback: SQLite for quick local testing
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -143,3 +161,9 @@ STATIC_URL = 'static/'
 
 # Third-party APIs
 NEWSAPI_KEY = config("NEWSAPI_KEY", default="") if config else ""
+
+
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Whitenoise for serving static files on Vercel
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
