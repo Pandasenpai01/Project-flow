@@ -8,6 +8,11 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
 """
 
 import os
+import sys
+
+# Add the directory containing manage.py to the Python path
+# This allows Vercel to find the 'flow' package when running from the repo root
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from django.core.wsgi import get_wsgi_application
 
